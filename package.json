@@ -1,9 +1,47 @@
 {
-  "name": "sans-titre-docs",
+  "name": "tampon",
   "version": "0.1.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
-    "dev": "bun run server.ts"
+    "dev": "bun run server.ts",
+    "build:linux": "electron-builder --linux",
+    "build:mac":   "electron-builder --mac",
+    "build:win":   "electron-builder --win"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@vivliostyle/cli": "^8.0.0"
+  },
+  "devDependencies": {
+    "electron":         "^31.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId":       "art.sans-titre.tampon",
+    "productName": "Tampon",
+    "directories": { "output": "dist" },
+    "files": [
+      "electron/**/*"
+    ],
+    "extraResources": [
+      { "from": "bin/bun",    "to": "bin/bun" },
+      { "from": "gabarits",   "to": "app/gabarits" },
+      { "from": "ui",         "to": "app/ui" },
+      { "from": "server.ts",  "to": "app/server.ts" },
+      { "from": "src",        "to": "app/src" },
+      { "from": "node_modules/@vivliostyle", "to": "app/node_modules/@vivliostyle" },
+      { "from": "node_modules/.bin/vivliostyle", "to": "app/node_modules/.bin/vivliostyle" }
+    ],
+    "linux": {
+      "target":   "AppImage",
+      "category": "Office"
+    },
+    "mac": {
+      "target":   "dmg",
+      "category": "public.app-category.productivity"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
 }

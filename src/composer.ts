@@ -3,8 +3,8 @@ import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { journal } from "./journal";
 
-const GABARITS_DIR = "/app/gabarits";
-const TIRAGES_DIR = "/app/tirages";
+const GABARITS_DIR = process.env.GABARITS_DIR ?? "/app/gabarits";
+const TIRAGES_DIR  = process.env.TIRAGES_DIR  ?? "/app/tirages";
 
 function slugifier(texte: string): string {
   return texte
@@ -55,7 +55,9 @@ export async function composer(
 
   try {
     journal.info(`vivliostyle build → ${nomTirage}`);
-    const proc = await $`vivliostyle build ${mdPath} --theme ${themePath} -o ${tiragePath} --executable-browser /usr/bin/chromium`;
+    const vivliostyle = process.env.VIVLIOSTYLE_BIN ?? "vivliostyle";
+    const chromium    = process.env.CHROMIUM_PATH   ?? "/usr/bin/chromium";
+    const proc = await $`${vivliostyle} build ${mdPath} --theme ${themePath} -o ${tiragePath} --executable-browser ${chromium}`;
     const stdout = proc.stdout.toString().trim();
     if (stdout) journal.info(stdout);
   } catch (err: any) {

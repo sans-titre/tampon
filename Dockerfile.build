@@ -1,0 +1,31 @@
+FROM node:20-bookworm-slim
+
+# Dépendances système pour electron-builder (packaging Linux)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl unzip \
+    libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 \
+    xauth xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
+# Bun
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:$PATH"
+
+WORKDIR /build
+
+# Dépendances npm (electron, electron-builder, vivliostyle)
+COPY package.json .
+RUN npm install
+
+# Copier le binaire Bun comme sidecar pour le bundle Electron
+RUN mkdir -p bin && cp /root/.bun/bin/bun bin/bun
+
+# Sources
+COPY . .
+
+# Build (Linux par défaut — Mac et Win nécessitent leurs propres runners CI)
+RUN npm run build:linux
+
+# Les artefacts sont dans dist/
+# docker build -f Dockerfile.build -t tampon-builder .
+# docker run --rm -v $(pwd)/dist:/build/dist tampon-builder
