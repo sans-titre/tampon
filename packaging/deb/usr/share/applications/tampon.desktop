@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Tampon
+GenericName=Atelier de composition
+Comment=Générateur de PDFs typographiques à partir de Markdown
+Exec=/usr/share/tampon/tampon
+Terminal=false
+Type=Application
+Categories=Office;Publishing;
+StartupNotify=true

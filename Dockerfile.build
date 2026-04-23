@@ -18,3 +18,31 @@ FROM debian:bookworm-slim AS export
 COPY --from=builder /app/dist/tampon  /bundle/tampon
 COPY --from=builder /app/gabarits/    /bundle/gabarits/
 COPY --from=builder /app/ui/          /bundle/ui/
+
+# Stage deb : paquet .deb installable
+FROM debian:bookworm-slim AS deb
+
+RUN apt-get update && apt-get install -y --no-install-recommends dpkg-dev \
+  && rm -rf /var/lib/apt/lists/*
+
+# Assets du binaire
+COPY --from=builder /app/dist/tampon  /pkg/usr/share/tampon/tampon
+COPY --from=builder /app/gabarits/    /pkg/usr/share/tampon/gabarits/
+COPY --from=builder /app/ui/          /pkg/usr/share/tampon/ui/
+
+# Wrapper dans le PATH
+RUN mkdir -p /pkg/usr/local/bin \
+  && printf '#!/bin/sh\nexec /usr/share/tampon/tampon "$@"\n' \
+     > /pkg/usr/local/bin/tampon \
+  && chmod 755 /pkg/usr/local/bin/tampon
+
+# Métadonnées packaging
+COPY packaging/deb/DEBIAN/                       /pkg/DEBIAN/
+COPY packaging/deb/usr/share/applications/       /pkg/usr/share/applications/
+
+RUN chmod 755 /pkg/DEBIAN/postinst
+
+RUN dpkg-deb --build /pkg /tampon_0.2.0_amd64.deb
+
+FROM scratch AS deb-out
+COPY --from=deb /tampon_0.2.0_amd64.deb /tampon_0.2.0_amd64.deb
