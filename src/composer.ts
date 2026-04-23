@@ -57,7 +57,10 @@ export async function composer(
     journal.info(`vivliostyle build → ${nomTirage}`);
     const vivliostyle = process.env.VIVLIOSTYLE_BIN ?? "vivliostyle";
     const chromium    = process.env.CHROMIUM_PATH   ?? "/usr/bin/chromium";
-    const proc = await $`${vivliostyle} build ${mdPath} --theme ${themePath} -o ${tiragePath} --executable-browser ${chromium}`;
+    const bunBin      = process.env.BUN_BIN          ?? "bun";
+    // On appelle vivliostyle via Bun pour éviter le Node système (shebang) qui
+    // peut être trop ancien ou ne pas gérer l'ESM. Bun ignore le shebang.
+    const proc = await $`${bunBin} ${vivliostyle} build ${mdPath} --theme ${themePath} -o ${tiragePath} --executable-browser ${chromium}`;
     const stdout = proc.stdout.toString().trim();
     if (stdout) journal.info(stdout);
   } catch (err: any) {

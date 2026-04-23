@@ -2,6 +2,9 @@
   "name": "tampon",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://github.com/sans-titre/tampon",
+  "author": "sans-titre <sanstitrenumero2@gmail.com>",
+  "description": "Générateur de PDFs typographiques à partir de Markdown",
   "main": "electron/main.js",
   "scripts": {
     "dev": "bun run server.ts",
@@ -19,6 +22,8 @@
   "build": {
     "appId":       "art.sans-titre.tampon",
     "productName": "Tampon",
+    "icon":        "electron/assets/icon.png",
+    "afterPack":   "electron/afterPack.js",
     "directories": { "output": "dist" },
     "files": [
       "electron/**/*"
@@ -35,8 +40,12 @@
       { "from": "node_modules/.bin/vivliostyle", "to": "app/node_modules/.bin/vivliostyle" }
     ],
     "linux": {
-      "target":   "AppImage",
+      "target":   ["deb", "AppImage"],
       "category": "Office"
+    },
+    "deb": {
+      "afterInstall": "electron/scripts/after-install.sh",
+      "afterRemove":  "electron/scripts/after-remove.sh"
     },
     "mac": {
       "target":   "dmg",

@@ -27,18 +27,38 @@ Le pipeline intérieur reste identique : `server.ts`, `composer.ts`, Vivliostyle
 
 ![Architecture Electron](../rendus/architecture-electron.png)
 
-## Décision — branche abandonnée
+## Ce qui a été implémenté
 
-Cette piste est documentée comme référence mais **non retenue**. Electron reste une solution viable et cohérente (Chromium partagé entre l'UI et Vivliostyle), mais ce n'est pas l'état de l'art en 2026 — c'est le choix par défaut de 2015, pas le choix moderne.
+- `electron/main.js` — spawne Bun en child process, gère le cycle de vie, attend que le serveur réponde avant d'ouvrir la fenêtre
+- `Dockerfile.build` — build isolé via Docker : Electron, Bun sidecar, Vivliostyle, Playwright Chromium bundlé
+- `electron/afterPack.js` — retire `chrome-sandbox` de l'AppImage (incompatible setuid)
+- `electron/assets/icon.png` — icône 512×512
+- Variables d'env (`GABARITS_DIR`, `TIRAGES_DIR`, `LOGS_DIR`, `BUN_BIN`, `VIVLIOSTYLE_BIN`, `CHROMIUM_PATH`) — découplage complet des chemins Docker/Electron
+- Format `.deb` préparé avec `after-install.sh` pour `chown root / chmod 4755` sur `chrome-sandbox`
 
-Le vrai problème est en amont : **Vivliostyle impose Chromium**. Tant qu'on en dépend, on est condamné à embarquer un navigateur entier dans le bundle, ce qui interdit les approches légères (Tauri, WebView système).
+## Ce qui fonctionne
 
-La voie retenue est **Paged.js** — un renderer CSS Paged Media en JS pur, sans dépendance Chromium. Il tourne dans n'importe quelle WebView, ouvre la porte à Tauri, et est activement maintenu par le Consortium W3C. Voir `explore-pagedjs-desktop.md`.
+- Build AppImage et .deb via `docker build -f Dockerfile.build` ✓
+- Serveur Bun spawné en child process ✓
+- UI accessible et fenêtre Electron qui s'ouvre ✓ (testé)
+- Génération PDF fonctionnelle depuis l'AppImage ✓
 
-## Points à creuser (archivé)
+## Mur architectural rencontré — sandbox Chromium sur Ubuntu 24.04
 
-- **Vivliostyle → Chromium d'Electron** : Electron expose le chemin de son exécutable Chromium (`process.execPath` ou via `electron` package). Vivliostyle accepte `--executable-browser` — à valider que les deux s'entendent.
-- **Bun comme processus enfant** : Electron Main lance `bun server.ts` via `child_process.spawn`, gère le cycle de vie (start/stop avec la fenêtre).
-- **Packaging** : `electron-builder` ou `electron-forge` pour produire `.dmg`, `.exe`, `.AppImage`.
-- **`tirages/`** : rediriger vers `~/Documents/Tampon/` ou équivalent OS plutôt qu'un chemin Docker.
-- **Fonts** : embarquer Atkinson Hyperlegible dans le bundle plutôt que dépendre de `~/.local/share/fonts`.
+Trois couches de problème imbriquées :
+
+1. **AppImage + setuid** : `chrome-sandbox` doit être `chown root / chmod 4755` — impossible dans une AppImage montée en read-only.
+2. **User namespaces (fallback)** : bloqué par Ubuntu 24.04 via `kernel.apparmor_restrict_unprivileged_userns=1`, restriction AppArmor introduite en 23.10.
+3. **Fix `.deb`** : un paquet `.deb` peut exécuter un post-install qui règle les permissions — c'est ce que font VS Code, Slack, Discord. Implémenté mais non testé.
+
+**Fix supplémentaire identifié** : lancer Vivliostyle via `BUN_BIN` et non le Node système (shebang `#!/usr/bin/env node` invoque parfois un Node trop ancien qui ne gère pas l'ESM). Implémenté dans `composer.ts`.
+
+## Décision — branche suspendue, non abandonnée
+
+Le `.deb` est la solution correcte pour Electron sur Ubuntu et reste à tester. Mais le rapport complexité/bénéfice de toute l'approche Electron est défavorable pour Tampon :
+
+- 330Mo de bundle pour une UI qui reste dans un onglet
+- Sandbox Chromium : problème récurrent à chaque évolution kernel/AppArmor
+- La valeur d'Electron (fenêtre native) est secondaire pour cet outil
+
+**On repart sur `explore/bun-launcher`** : service Bun standalone + navigateur système + Chromium système pour Vivliostyle. Fraction de la complexité, portabilité maximale. Les apprentissages de cette branche (env vars, paths, Vivliostyle via Bun, Dockerfile.build) sont directement réutilisables.

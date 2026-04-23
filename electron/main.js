@@ -53,6 +53,7 @@ function startBun(paths) {
       GABARITS_DIR:    paths.gabarits,
       TIRAGES_DIR:     paths.tirages,
       LOGS_DIR:        paths.logs,
+      BUN_BIN:         paths.bun,
       VIVLIOSTYLE_BIN: paths.vivliostyle,
       CHROMIUM_PATH:   paths.chromium,
     },
