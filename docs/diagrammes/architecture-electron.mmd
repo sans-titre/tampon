@@ -1,0 +1,85 @@
+flowchart LR
+    subgraph electron [" "]
+        MAIN["`**Electron Main**
+        lance Bun en child process,
+        ouvre la fenêtre,
+        gère le cycle de vie`"]
+
+        WIN["`**Electron Window**
+        WebView locale
+        remplace le navigateur système`"]
+
+        subgraph srv [Bun]
+            SRV["`**server.ts**
+            serveur HTTP local
+            route les requêtes,
+            sert les fichiers statiques`"]
+        end
+
+        subgraph pipeline [Pipeline]
+            COMP["`**composer.ts**
+            orchestre la composition :
+            préfixe les running elements,
+            appelle Vivliostyle`"]
+            RUNNING["`**entetesRunning**
+            injecte les métadonnées
+            (titre, date, auteur)
+            comme div HTML brut`"]
+        end
+
+        subgraph css [CSS]
+            C["`**caracteres.css**
+            tokens typo : fontes,
+            corps, couleurs, marges`"]
+            H["`**habillage.css**
+            éléments réutilisables :
+            bandeau, pied de page,
+            tables, listes`"]
+            G["`**gabarit-*.css**
+            mise en page par format :
+            @page, marges, hiérarchie
+            des titres`"]
+        end
+
+        subgraph rendu [Rendu PDF]
+            VIVO["`**Vivliostyle CLI**
+            convertit Markdown → HTML
+            via VFM, pagine, gère
+            les éléments courants`"]
+            CHROM["`**Chromium embarqué**
+            instance partagée
+            avec Electron Window —
+            --executable-browser`"]
+        end
+    end
+
+    FONTS[("`**fonts/**
+    embarquées dans
+    le bundle Electron`")]
+
+    TIRAGES[("`**~/Documents/Tampon/**
+    dossier de sortie
+    dans le home utilisateur`")]
+
+    MAIN -->|spawn| SRV
+    MAIN -->|ouvre| WIN
+    WIN -->|"`markdown + meta
+    + gabarit`"| SRV
+    SRV --> COMP
+    COMP --> RUNNING
+    C & H --> G
+    RUNNING -->|"`document.md
+    + --theme gabarit-*.css`"| VIVO
+    G -->|"`--theme`"| VIVO
+    VIVO --> CHROM
+    FONTS --> CHROM
+    CHROM --> TIRAGES
+    TIRAGES -->|stream PDF| SRV
+    SRV -->|PDF| WIN
+
+    style MAIN fill:#c0392b,color:#fff,stroke:#922b21
+    style WIN  fill:#c0392b,color:#fff,stroke:#922b21
+    style CHROM fill:#c0392b,color:#fff,stroke:#922b21
+    style FONTS fill:#c0392b,color:#fff,stroke:#922b21
+    style TIRAGES fill:#c0392b,color:#fff,stroke:#922b21
+    style electron fill:#f0f0f0,color:#111,stroke:#c0392b,stroke-width:2px
