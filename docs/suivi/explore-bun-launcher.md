@@ -66,7 +66,15 @@ make build   # → dist/bundle/tampon + gabarits/ + ui/
 
 ## Points à creuser / prochaines étapes
 
+- **Supprimer le prérequis vivliostyle** ← priorité v0.3
+  Compiler vivliostyle en binaire standalone avec `bun build --compile` et le bundler dans le tarball et le `.deb`. Zéro prérequis utilisateur.
+  Plan :
+  1. `Dockerfile.build` : `bun add @vivliostyle/cli` + `bun build --compile node_modules/.bin/vivliostyle --outfile dist/vivliostyle`
+  2. Inclure `dist/vivliostyle` dans les stages `export` et `deb` aux côtés du binaire `tampon`
+  3. `src/composer.ts` : `VIVLIOSTYLE = join(dirname(process.execPath), "vivliostyle")` par défaut
+  4. Supprimer le `postinst` vivliostyle et la section prérequis du README
+  Inconnue à valider : taille du binaire vivliostyle compilé (potentiellement 100-200MB)
+
 - **Cross-platform** : `--target bun-darwin-arm64`, `bun-darwin-x64`, `bun-windows-x64` depuis le même Docker
-- **Package .deb** : installeur Linux propre, `desktop` entry pour double-clic → **cible v0.2**
 - **Tarball universel** : `tampon-linux-x64.tar.gz`, `tampon-darwin-arm64.tar.gz`, `tampon-windows-x64.zip`
 - **Shutdown propre** : signal handler — pour l'instant le process reste en background
