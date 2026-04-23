@@ -2,15 +2,19 @@ FROM node:20-bookworm-slim
 
 # Dépendances système pour electron-builder (packaging Linux) et Chromium
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl unzip \
+    curl unzip ca-certificates \
     libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 libgbm1 \
     libx11-xcb1 libxcb-dri3-0 libasound2 \
     xauth xvfb \
     && rm -rf /var/lib/apt/lists/*
 
-# Bun
-RUN curl -fsSL https://bun.sh/install | bash
-ENV PATH="/root/.bun/bin:$PATH"
+# Bun — téléchargement direct du binaire pour éviter les problèmes de PATH entre étapes
+RUN curl -fsSL https://github.com/oven-sh/bun/releases/latest/download/bun-linux-x64.zip -o /tmp/bun.zip \
+    && unzip /tmp/bun.zip -d /tmp/bun-extract \
+    && mv /tmp/bun-extract/bun-linux-x64/bun /usr/local/bin/bun \
+    && chmod +x /usr/local/bin/bun \
+    && rm -rf /tmp/bun.zip /tmp/bun-extract \
+    && bun --version
 
 WORKDIR /build
 
@@ -21,20 +25,19 @@ RUN npm install
 # Télécharger le Chromium de Playwright (utilisé par Vivliostyle)
 RUN npx playwright install chromium
 
-# Copier le Chromium au chemin stable bin/chromium
-# playwright chromium.executablePath() retourne le chemin versionné — on le résout ici
-RUN node -e " \
-  const { chromium } = require('playwright-core'); \
-  const src = chromium.executablePath(); \
-  const { execSync } = require('child_process'); \
-  require('fs').mkdirSync('/build/bin/chromium-bundle', { recursive: true }); \
-  execSync('cp -r ' + require('path').dirname(src) + '/. /build/bin/chromium-bundle/'); \
-  require('fs').writeFileSync('/build/bin/chromium-path.txt', require('path').basename(src)); \
-  console.log('Chromium copié depuis', src); \
-"
+# Trouver le binaire Chromium réellement téléchargé et le bundler
+# On cherche 'chrome' exécutable dans le cache Playwright — plus robuste que executablePath()
+RUN set -e; \
+    CHROME=$(find /root/.cache/ms-playwright -name 'chrome' -type f | head -1); \
+    if [ -z "$CHROME" ]; then echo "Chromium introuvable dans le cache Playwright" && exit 1; fi; \
+    echo "Chromium trouvé : $CHROME"; \
+    mkdir -p /build/bin/chromium-bundle; \
+    cp -r "$(dirname "$CHROME")/." /build/bin/chromium-bundle/; \
+    echo "$(basename "$CHROME")" > /build/bin/chromium-path.txt; \
+    echo "OK : $(cat /build/bin/chromium-path.txt)"
 
-# Copier le binaire Bun comme sidecar
-RUN cp /root/.bun/bin/bun bin/bun
+# Copier le binaire Bun comme sidecar pour le bundle Electron
+RUN cp /usr/local/bin/bun bin/bun
 
 # Sources
 COPY . .

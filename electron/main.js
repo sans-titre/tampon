@@ -19,12 +19,14 @@ function getChromiumPath(res) {
 
 function getPaths() {
   if (app.isPackaged) {
-    const res = process.resourcesPath
+    const res     = process.resourcesPath
+    const userDir = path.join(app.getPath('documents'), 'Tampon')
     return {
       bun:         path.join(res, 'bin', 'bun'),
       app:         path.join(res, 'app'),
       gabarits:    path.join(res, 'app', 'gabarits'),
-      tirages:     path.join(app.getPath('documents'), 'Tampon'),
+      tirages:     path.join(userDir, 'tirages'),
+      logs:        path.join(userDir, 'logs'),
       vivliostyle: path.join(res, 'app', 'node_modules', '.bin', 'vivliostyle'),
       chromium:    getChromiumPath(res),
     }
@@ -35,6 +37,7 @@ function getPaths() {
     app:         path.join(__dirname, '..'),
     gabarits:    path.join(__dirname, '..', 'gabarits'),
     tirages:     path.join(__dirname, '..', 'tirages'),
+    logs:        path.join(__dirname, '..', 'logs'),
     vivliostyle: 'vivliostyle',
     chromium:    '/usr/bin/chromium',
   }
@@ -49,6 +52,7 @@ function startBun(paths) {
       ...process.env,
       GABARITS_DIR:    paths.gabarits,
       TIRAGES_DIR:     paths.tirages,
+      LOGS_DIR:        paths.logs,
       VIVLIOSTYLE_BIN: paths.vivliostyle,
       CHROMIUM_PATH:   paths.chromium,
     },
