@@ -1,0 +1,20 @@
+FROM oven/bun:1-debian AS builder
+
+WORKDIR /app
+
+COPY package.json bun.lock* ./
+RUN bun install
+
+COPY server.ts .
+COPY src/ ./src/
+COPY gabarits/ ./gabarits/
+COPY ui/ ./ui/
+
+RUN mkdir -p dist \
+  && bun build --compile server.ts --outfile dist/tampon
+
+# Stage export : binaire + assets dans /bundle
+FROM debian:bookworm-slim AS export
+COPY --from=builder /app/dist/tampon  /bundle/tampon
+COPY --from=builder /app/gabarits/    /bundle/gabarits/
+COPY --from=builder /app/ui/          /bundle/ui/

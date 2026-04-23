@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bun run server.ts"
+    "dev": "TAMPON_DIR=. TIRAGES_DIR=./tirages LOGS_DIR=./logs CHROMIUM_PATH=/usr/bin/chromium bun run server.ts",
+    "build": "bun build --compile server.ts --outfile dist/tampon",
+    "dist": "bun run build && mkdir -p dist/tampon-bundle && cp dist/tampon dist/tampon-bundle/ && cp -r gabarits dist/tampon-bundle/ && cp -r ui dist/tampon-bundle/"
   },
   "dependencies": {}
 }

@@ -1,0 +1,73 @@
+flowchart LR
+    BIN["`**binaire tampon**
+    compilé avec
+    bun build --compile —
+    démarre le serveur,
+    ouvre le navigateur`"]
+
+    subgraph srv [Bun — embarqué dans le binaire]
+        SRV["`**server.ts**
+        serveur HTTP local
+        route les requêtes,
+        sert les fichiers statiques`"]
+    end
+
+    subgraph pipeline [Pipeline]
+        COMP["`**composer.ts**
+        orchestre la composition :
+        préfixe les running elements,
+        appelle Vivliostyle`"]
+        RUNNING["`**entetesRunning**
+        injecte les métadonnées
+        comme div HTML brut`"]
+    end
+
+    subgraph css [CSS — embarqués dans le binaire]
+        C["`**caracteres.css**
+        tokens typo`"]
+        H["`**habillage.css**
+        running elements,
+        tables, listes`"]
+        G["`**gabarit-*.css**
+        @page, marges,
+        hiérarchie`"]
+    end
+
+    subgraph rendu [Rendu PDF]
+        VIVO["`**Vivliostyle CLI**
+        convertit Markdown → HTML
+        via VFM, pagine`"]
+        CHROM["`**Chromium système**
+        déjà installé,
+        déjà sandbox —
+        zéro configuration`"]
+    end
+
+    BROWSER["`**Navigateur système**
+    ouvert automatiquement
+    sur localhost:3000 —
+    UI de composition`"]
+
+    TIRAGES[("`**~/Documents/Tampon/**
+    dossier de sortie
+    dans le home`")]
+
+    BIN -->|spawn| SRV
+    BIN -->|xdg-open / open| BROWSER
+    BROWSER -->|"`markdown + meta
+    + gabarit`"| SRV
+    SRV --> COMP
+    COMP --> RUNNING
+    C & H --> G
+    RUNNING -->|"`document.md
+    + --theme`"| VIVO
+    G -->|"`--theme`"| VIVO
+    VIVO --> CHROM
+    CHROM --> TIRAGES
+    TIRAGES -->|stream PDF| SRV
+    SRV -->|PDF| BROWSER
+
+    style BIN     fill:#c0392b,color:#fff,stroke:#922b21
+    style BROWSER fill:#c0392b,color:#fff,stroke:#922b21
+    style CHROM   fill:#c0392b,color:#fff,stroke:#922b21
+    style TIRAGES fill:#c0392b,color:#fff,stroke:#922b21

@@ -3,6 +3,11 @@ services:
     build: .
     ports:
       - "3000:3000"
+    environment:
+      - TAMPON_DIR=/app
+      - TIRAGES_DIR=/app/tirages
+      - LOGS_DIR=/app/logs
+      - CHROMIUM_PATH=/usr/bin/chromium
     volumes:
       - ./tirages:/app/tirages
       - ./logs:/app/logs
