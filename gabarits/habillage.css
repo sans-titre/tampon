@@ -1,0 +1,110 @@
+/* ─── Éléments courants (running elements) ──────────────────────────────── */
+
+.bandeau-nom {
+  position: running(bandeau-nom);
+  font-family: var(--fonte-titre);
+  font-size: var(--corps-bandeau);
+  font-weight: var(--graisse-forte);
+  color: var(--encre-secondaire);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.bandeau-titre-courant {
+  position: running(bandeau-titre-courant);
+  font-family: var(--fonte-titre);
+  font-size: var(--corps-bandeau);
+  color: var(--encre-secondaire);
+  text-align: center;
+}
+
+.bandeau-date-courante {
+  position: running(bandeau-date-courante);
+  font-family: var(--fonte-titre);
+  font-size: var(--corps-bandeau);
+  color: var(--encre-secondaire);
+  text-align: right;
+}
+
+.pied-coordonnees {
+  position: running(pied-coordonnees);
+  font-family: var(--fonte-titre);
+  font-size: var(--corps-pied);
+  color: var(--encre-secondaire);
+}
+
+/* ─── Tables ─────────────────────────────────────────────────────────────── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: var(--corps-legende);
+  font-family: var(--fonte-titre);
+}
+
+thead th {
+  border-bottom: 1pt solid var(--filet-fort);
+  padding: 4pt 6pt;
+  text-align: left;
+  font-weight: var(--graisse-forte);
+}
+
+tbody td {
+  border-bottom: 0.5pt solid var(--filet-leger);
+  padding: 4pt 6pt;
+}
+
+/* ─── Listes ─────────────────────────────────────────────────────────────── */
+
+ul,
+ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+li {
+  margin-bottom: 0.2em;
+}
+
+/* ─── Code ───────────────────────────────────────────────────────────────── */
+
+code {
+  font-family: var(--fonte-mono);
+  font-size: 0.88em;
+  background: #f5f5f5;
+  padding: 1pt 3pt;
+  border-radius: 2pt;
+}
+
+pre {
+  font-family: var(--fonte-mono);
+  font-size: 0.88em;
+  background: #f5f5f5;
+  padding: 8pt 10pt;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* ─── Filets horizontaux ─────────────────────────────────────────────────── */
+
+hr {
+  border: none;
+  border-top: 0.5pt solid var(--filet-leger);
+  margin: 1.5em 0;
+}
+
+/* ─── Emphases ───────────────────────────────────────────────────────────── */
+
+strong {
+  font-weight: var(--graisse-forte);
+}
+
+em {
+  font-style: italic;
+}

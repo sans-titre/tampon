@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>atelier sans-titre</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --encre: #1a1a1a;
+      --encre-secondaire: #666;
+      --fond: #f4f4f2;
+      --fond-panneau: #ffffff;
+      --filet: #ddd;
+      --accent: #1a1a1a;
+      --fonte: "Helvetica Neue", Arial, sans-serif;
+      --fonte-mono: "Courier New", monospace;
+      --rayon: 4px;
+    }
+
+    body {
+      font-family: var(--fonte);
+      font-size: 14px;
+      background: var(--fond);
+      color: var(--encre);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── En-tête ── */
+    header {
+      display: flex;
+      align-items: baseline;
+      gap: 1.5rem;
+      padding: 12px 20px;
+      background: var(--encre);
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    header span {
+      font-size: 12px;
+      opacity: 0.5;
+    }
+
+    /* ── Atelier ── */
+    .atelier {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Zone de composition ── */
+    .zone-composition {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 8px;
+    }
+
+    label.libelle {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--encre-secondaire);
+    }
+
+    #manuscrit {
+      flex: 1;
+      resize: none;
+      font-family: var(--fonte-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      border: 1px solid var(--filet);
+      border-radius: var(--rayon);
+      padding: 14px;
+      background: var(--fond-panneau);
+      color: var(--encre);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    #manuscrit:focus {
+      border-color: var(--accent);
+    }
+
+    /* ── Panneau de commande ── */
+    .panneau {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--fond-panneau);
+      border-left: 1px solid var(--filet);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    /* ── Section dans le panneau ── */
+    .section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .section-titre {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--encre-secondaire);
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--filet);
+    }
+
+    .champ {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .champ label {
+      font-size: 11px;
+      color: var(--encre-secondaire);
+    }
+
+    input[type="text"],
+    select {
+      font-family: var(--fonte);
+      font-size: 13px;
+      padding: 7px 10px;
+      border: 1px solid var(--filet);
+      border-radius: var(--rayon);
+      background: var(--fond);
+      color: var(--encre);
+      outline: none;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+    }
+
+    /* ── Champ fichier avec extension ── */
+    .champ-fichier {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .champ-fichier input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .champ-fichier .ext {
+      font-size: 12px;
+      color: var(--encre-secondaire);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── Bouton Composer ── */
+    #btn-composer {
+      font-family: var(--fonte);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 10px 14px;
+      border: none;
+      border-radius: var(--rayon);
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      width: 100%;
+    }
+
+    #btn-composer:hover { opacity: 0.85; }
+    #btn-composer:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Statut ── */
+    .statut {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--encre-secondaire);
+      min-height: 36px;
+    }
+
+    .statut a {
+      color: var(--encre);
+      font-weight: 700;
+      text-decoration: underline;
+    }
+
+    .statut.erreur { color: #c00; }
+
+    /* ── Aide markdown ── */
+    .aide {
+      font-size: 11px;
+      color: var(--encre-secondaire);
+      line-height: 1.7;
+    }
+
+    .aide code {
+      font-family: var(--fonte-mono);
+      font-size: 10px;
+      background: var(--fond);
+      padding: 1px 3px;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>sans-titre</h1>
+  <span>atelier de composition</span>
+</header>
+
+<div class="atelier">
+
+  <div class="zone-composition">
+    <label class="libelle" for="manuscrit">Manuscrit</label>
+    <textarea id="manuscrit" spellcheck="false" placeholder="# Titre principal
+
+Paragraphe de contenu...
+
+## Section
+
+- item
+- item
+
+| Col A | Col B |
+|-------|-------|
+| val   | val   |"></textarea>
+  </div>
+
+  <aside class="panneau">
+
+    <div class="section">
+      <div class="section-titre">Format</div>
+      <div class="champ">
+        <label for="gabarit">Gabarit</label>
+        <select id="gabarit">
+          <option value="rapport">Rapport</option>
+          <option value="lettre">Lettre</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-titre">Métadonnées</div>
+      <div class="champ">
+        <label for="meta-titre">Titre</label>
+        <input type="text" id="meta-titre" placeholder="Rapport d'activité 2026">
+      </div>
+      <div class="champ">
+        <label for="meta-date">Date</label>
+        <input type="text" id="meta-date" placeholder="Avril 2026">
+      </div>
+      <div class="champ">
+        <label for="meta-auteur">Auteur</label>
+        <input type="text" id="meta-auteur" placeholder="Prénom Nom">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-titre">Fichier</div>
+      <div class="champ">
+        <label for="nom-fichier">Nom du fichier</label>
+        <div class="champ-fichier">
+          <input type="text" id="nom-fichier" placeholder="rapport-2026">
+          <span class="ext">.pdf</span>
+        </div>
+      </div>
+    </div>
+
+    <button id="btn-composer">Composer →</button>
+
+    <div class="statut" id="statut"></div>
+
+    <div class="section">
+      <div class="section-titre">Markdown</div>
+      <div class="aide">
+        <code>#</code> titre &nbsp; <code>##</code> section<br>
+        <code>**gras**</code> &nbsp; <code>_italique_</code><br>
+        <code>- item</code> liste<br>
+        <code>| A | B |</code> tableau
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<script src="/sans-titre.art/tampon/ui/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+:root {
+  /* Fontes */
+  --fonte-labeur: "Atkinson Hyperlegible", Arial, sans-serif;
+  --fonte-titre: "Atkinson Hyperlegible", Arial, sans-serif;
+  --fonte-mono: "Courier New", monospace;
+
+  /* Corps */
+  --corps: 10.5pt;
+  --corps-legende: 8.5pt;
+  --corps-bandeau: 8pt;
+  --corps-pied: 7pt;
+
+  /* Interligne */
+  --interligne: 1.55;
+
+  /* Graisse */
+  --graisse-normale: 400;
+  --graisse-forte: 700;
+
+  /* Encre */
+  --encre: #1a1a1a;
+  --encre-secondaire: #666666;
+
+  /* Filets */
+  --filet-leger: #dddddd;
+  --filet-fort: #999999;
+
+  /* Marges de page */
+  --marge-lr: 2.2cm;
+  --marge-haut: 2.8cm;
+  --marge-bas: 2.5cm;
+
+  /* Rythme vertical */
+  --espace-section: 2em;
+  --espace-titre: 0.6em;
+}

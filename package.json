@@ -1,0 +1,9 @@
+{
+  "name": "sans-titre-docs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "bun run server.ts"
+  },
+  "dependencies": {}
+}

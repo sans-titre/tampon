@@ -1,0 +1,103 @@
+@import "caracteres.css";
+@import "habillage.css";
+
+/* ─── Page ───────────────────────────────────────────────────────────────── */
+
+@page {
+  size: A4;
+  margin: var(--marge-haut) var(--marge-lr) var(--marge-bas) var(--marge-lr);
+
+  @top-left {
+    content: element(bandeau-nom);
+    vertical-align: bottom;
+    padding-bottom: 5pt;
+    border-bottom: 0.5pt solid var(--filet-fort);
+  }
+
+  @top-center {
+    content: element(bandeau-titre-courant);
+    vertical-align: bottom;
+    padding-bottom: 5pt;
+    border-bottom: 0.5pt solid var(--filet-fort);
+  }
+
+  @top-right {
+    content: element(bandeau-date-courante);
+    vertical-align: bottom;
+    padding-bottom: 5pt;
+    border-bottom: 0.5pt solid var(--filet-fort);
+  }
+
+  @bottom-left {
+    content: element(pied-coordonnees);
+    vertical-align: top;
+    padding-top: 4pt;
+  }
+
+  @bottom-center {
+    content: counter(page) " / " counter(pages);
+    font-family: var(--fonte-titre);
+    font-size: var(--corps-pied);
+    color: var(--encre-secondaire);
+    vertical-align: top;
+    padding-top: 4pt;
+  }
+}
+
+/* ─── Corps du document ──────────────────────────────────────────────────── */
+
+body {
+  font-family: var(--fonte-labeur);
+  font-size: var(--corps);
+  line-height: var(--interligne);
+  color: var(--encre);
+}
+
+/* ─── Hiérarchie typographique ───────────────────────────────────────────── */
+
+h1 {
+  font-family: var(--fonte-titre);
+  font-size: 22pt;
+  font-weight: var(--graisse-forte);
+  line-height: 1.15;
+  margin-top: 0;
+  margin-bottom: 1.8em;
+  color: var(--encre);
+}
+
+h2 {
+  font-family: var(--fonte-titre);
+  font-size: 13pt;
+  font-weight: var(--graisse-forte);
+  margin-top: var(--espace-section);
+  margin-bottom: var(--espace-titre);
+  padding-bottom: 3pt;
+  border-bottom: 0.5pt solid var(--filet-leger);
+  color: var(--encre);
+}
+
+h3 {
+  font-family: var(--fonte-titre);
+  font-size: 10.5pt;
+  font-weight: var(--graisse-forte);
+  margin-top: 1.5em;
+  margin-bottom: 0.4em;
+  color: var(--encre);
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 0.8em;
+  text-align: justify;
+  hyphens: auto;
+  orphans: 3;
+  widows: 3;
+}
+
+blockquote {
+  margin: 1em 0 1em 1.5em;
+  padding-left: 1em;
+  border-left: 2pt solid var(--filet-fort);
+  color: var(--encre-secondaire);
+  font-style: italic;
+}

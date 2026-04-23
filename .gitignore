@@ -1,0 +1,6 @@
+tirages/*
+!tirages/.gitkeep
+logs/
+node_modules/
+bun.lock
+bun.lockb
