@@ -9,20 +9,27 @@ const BASE = '/sans-titre.art/tampon'
 let mainWindow = null
 let bunProcess = null
 
+function getChromiumPath(res) {
+  // Le Dockerfile.build copie le répertoire Chromium dans bin/chromium-bundle/
+  // et écrit le nom de l'exécutable dans bin/chromium-path.txt
+  const namePath = path.join(res, 'bin', 'chromium-path.txt')
+  const exeName  = fs.readFileSync(namePath, 'utf-8').trim()
+  return path.join(res, 'bin', 'chromium-bundle', exeName)
+}
+
 function getPaths() {
   if (app.isPackaged) {
     const res = process.resourcesPath
     return {
-      bun:          path.join(res, 'bin', 'bun'),
-      app:          path.join(res, 'app'),
-      gabarits:     path.join(res, 'app', 'gabarits'),
-      tirages:      path.join(app.getPath('documents'), 'Tampon'),
-      vivliostyle:  path.join(res, 'app', 'node_modules', '.bin', 'vivliostyle'),
-      // process.execPath = binaire Electron = Chromium — valider avec Vivliostyle
-      chromium:     process.execPath,
+      bun:         path.join(res, 'bin', 'bun'),
+      app:         path.join(res, 'app'),
+      gabarits:    path.join(res, 'app', 'gabarits'),
+      tirages:     path.join(app.getPath('documents'), 'Tampon'),
+      vivliostyle: path.join(res, 'app', 'node_modules', '.bin', 'vivliostyle'),
+      chromium:    getChromiumPath(res),
     }
   }
-  // Mode dev : tout sur le host, variables Docker ignorées
+  // Mode dev : pas de packaging, Chromium système (idem Docker)
   return {
     bun:         'bun',
     app:         path.join(__dirname, '..'),

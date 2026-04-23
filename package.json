@@ -24,11 +24,13 @@
       "electron/**/*"
     ],
     "extraResources": [
-      { "from": "bin/bun",    "to": "bin/bun" },
-      { "from": "gabarits",   "to": "app/gabarits" },
-      { "from": "ui",         "to": "app/ui" },
-      { "from": "server.ts",  "to": "app/server.ts" },
-      { "from": "src",        "to": "app/src" },
+      { "from": "bin/bun",             "to": "bin/bun" },
+      { "from": "bin/chromium-bundle", "to": "bin/chromium-bundle" },
+      { "from": "bin/chromium-path.txt", "to": "bin/chromium-path.txt" },
+      { "from": "gabarits",            "to": "app/gabarits" },
+      { "from": "ui",                  "to": "app/ui" },
+      { "from": "server.ts",           "to": "app/server.ts" },
+      { "from": "src",                 "to": "app/src" },
       { "from": "node_modules/@vivliostyle", "to": "app/node_modules/@vivliostyle" },
       { "from": "node_modules/.bin/vivliostyle", "to": "app/node_modules/.bin/vivliostyle" }
     ],

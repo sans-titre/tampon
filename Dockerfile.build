@@ -1,9 +1,10 @@
 FROM node:20-bookworm-slim
 
-# Dépendances système pour electron-builder (packaging Linux)
+# Dépendances système pour electron-builder (packaging Linux) et Chromium
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl unzip \
-    libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 \
+    libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 libgbm1 \
+    libx11-xcb1 libxcb-dri3-0 libasound2 \
     xauth xvfb \
     && rm -rf /var/lib/apt/lists/*
 
@@ -17,15 +18,32 @@ WORKDIR /build
 COPY package.json .
 RUN npm install
 
-# Copier le binaire Bun comme sidecar pour le bundle Electron
-RUN mkdir -p bin && cp /root/.bun/bin/bun bin/bun
+# Télécharger le Chromium de Playwright (utilisé par Vivliostyle)
+RUN npx playwright install chromium
+
+# Copier le Chromium au chemin stable bin/chromium
+# playwright chromium.executablePath() retourne le chemin versionné — on le résout ici
+RUN node -e " \
+  const { chromium } = require('playwright-core'); \
+  const src = chromium.executablePath(); \
+  const { execSync } = require('child_process'); \
+  require('fs').mkdirSync('/build/bin/chromium-bundle', { recursive: true }); \
+  execSync('cp -r ' + require('path').dirname(src) + '/. /build/bin/chromium-bundle/'); \
+  require('fs').writeFileSync('/build/bin/chromium-path.txt', require('path').basename(src)); \
+  console.log('Chromium copié depuis', src); \
+"
+
+# Copier le binaire Bun comme sidecar
+RUN cp /root/.bun/bin/bun bin/bun
 
 # Sources
 COPY . .
 
-# Build (Linux par défaut — Mac et Win nécessitent leurs propres runners CI)
+# Build AppImage Linux (Mac et Win nécessitent leurs propres runners CI)
 RUN npm run build:linux
 
 # Les artefacts sont dans dist/
-# docker build -f Dockerfile.build -t tampon-builder .
-# docker run --rm -v $(pwd)/dist:/build/dist tampon-builder
+#
+# Usage :
+#   docker build -f Dockerfile.build -t tampon-builder .
+#   docker run --rm -v $(pwd)/dist:/build/dist tampon-builder
