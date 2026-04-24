@@ -1,0 +1,11 @@
+Package: tampon
+Version: 0.2.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Depends: chromium | chromium-browser | google-chrome-stable
+Maintainer: sans-titre <sanstitrenumero2@gmail.com>
+Homepage: https://github.com/sans-titre/tampon
+Description: Atelier de composition typographique
+ Générateur de PDFs typographiques à partir de Markdown.
+ On colle du texte, on choisit un gabarit, on récupère un PDF prêt à imprimer.

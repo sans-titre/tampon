@@ -2,21 +2,34 @@
 
 Générateur de PDFs typographiques à partir de Markdown. On colle du texte, on choisit un gabarit, on récupère un PDF prêt à imprimer.
 
-## Lancer l'atelier
+## Lancer l'atelier (mode dev)
 
 ```bash
-docker compose up --build   # première fois
-docker compose up           # ensuite
+make dev        # docker compose up
 ```
 
 Ouvrir [http://localhost:3000/sans-titre.art/tampon](http://localhost:3000/sans-titre.art/tampon).
+
+## Binaire standalone (explore/bun-launcher)
+
+```bash
+make build      # compile dist/bundle/ via Docker
+```
+
+Lancer :
+
+```bash
+./dist/bundle/tampon
+# Le navigateur s'ouvre automatiquement sur http://localhost:3000/...
+# Les PDFs sont enregistrés dans ~/Documents/Tampon/
+```
 
 ## Utilisation
 
 1. Coller le contenu Markdown dans la zone de texte
 2. Renseigner les métadonnées (titre, date, auteur) et choisir un gabarit
 3. Cliquer **Composer →**
-4. Le PDF s'ouvre dans le navigateur et est enregistré dans `tirages/`
+4. Le PDF s'ouvre dans le navigateur et est enregistré dans `~/Documents/Tampon/`
 
 ## Frontmatter
 
@@ -58,6 +71,12 @@ Le pipeline délègue autant que possible à [Vivliostyle CLI](https://vivliosty
 
 `composer.ts` se limite à préfixer les running elements comme HTML brut dans le `.md`, pointer Vivliostyle vers le bon gabarit CSS, et récupérer le PDF produit.
 
-## Prérequis
+## Variables d'environnement
 
-Docker Desktop installé. C'est tout.
+| Variable | Défaut | Rôle |
+|---|---|---|
+| `TAMPON_DIR` | dossier du binaire | Base pour `gabarits/`, `ui/`, `vivliostyle` |
+| `TIRAGES_DIR` | `~/Documents/Tampon/` | Dossier de sortie des PDFs |
+| `LOGS_DIR` | `~/Documents/Tampon/logs/` | Fichier journal |
+| `VIVLIOSTYLE_BIN` | `$TAMPON_DIR/vivliostyle` | Chemin vers vivliostyle (bundlé) |
+| `PORT` | `3000` | Port HTTP (retry automatique si occupé) |
