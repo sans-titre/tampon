@@ -12,27 +12,6 @@ const BASE_DIR    = process.env.TAMPON_DIR ?? dirname(process.execPath);
 const UI_DIR      = join(BASE_DIR, "ui");
 const TIRAGES_DIR = process.env.TIRAGES_DIR ?? join(homedir(), "Documents", "Tampon");
 
-function detecterVivliostyle(): string | null {
-  const candidats = [
-    process.env.VIVLIOSTYLE_BIN,
-    join(homedir(), ".bun", "bin", "vivliostyle"),
-    join(homedir(), ".npm-global", "bin", "vivliostyle"),
-    "/usr/local/bin/vivliostyle",
-    "/usr/bin/vivliostyle",
-  ].filter(Boolean) as string[];
-  for (const c of candidats) {
-    if (existsSync(c)) return c;
-  }
-  return null;
-}
-
-const vivliostylePath = detecterVivliostyle();
-if (vivliostylePath) {
-  process.env.VIVLIOSTYLE_BIN = vivliostylePath;
-  journal.info(`vivliostyle détecté → ${vivliostylePath}`);
-} else {
-  journal.erreur("vivliostyle introuvable — installer via : bun add -g @vivliostyle/cli");
-}
 
 function ouvrirNavigateur(url: string) {
   try {

@@ -13,13 +13,7 @@ Ouvrir [http://localhost:3000/sans-titre.art/tampon](http://localhost:3000/sans-
 ## Binaire standalone (explore/bun-launcher)
 
 ```bash
-make build      # compile dist/bundle/tampon via Docker
-```
-
-Prérequis : vivliostyle CLI installé globalement.
-
-```bash
-bun add -g @vivliostyle/cli   # ou : npm install -g @vivliostyle/cli
+make build      # compile dist/bundle/ via Docker
 ```
 
 Lancer :
@@ -81,9 +75,8 @@ Le pipeline délègue autant que possible à [Vivliostyle CLI](https://vivliosty
 
 | Variable | Défaut | Rôle |
 |---|---|---|
-| `TAMPON_DIR` | dossier du binaire | Base pour `gabarits/` et `ui/` |
+| `TAMPON_DIR` | dossier du binaire | Base pour `gabarits/`, `ui/`, `vivliostyle` |
 | `TIRAGES_DIR` | `~/Documents/Tampon/` | Dossier de sortie des PDFs |
 | `LOGS_DIR` | `~/Documents/Tampon/logs/` | Fichier journal |
-| `CHROMIUM_PATH` | détection auto | Chemin vers chromium |
-| `VIVLIOSTYLE_BIN` | détection auto | Chemin vers vivliostyle |
+| `VIVLIOSTYLE_BIN` | `$TAMPON_DIR/vivliostyle` | Chemin vers vivliostyle (bundlé) |
 | `PORT` | `3000` | Port HTTP (retry automatique si occupé) |

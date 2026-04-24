@@ -1,12 +1,2 @@
 #!/bin/sh
 set -e
-
-if ! command -v vivliostyle >/dev/null 2>&1; then
-    echo ""
-    echo "  Tampon nécessite vivliostyle CLI pour composer les PDFs."
-    echo "  Installer avec :"
-    echo "    bun add -g @vivliostyle/cli"
-    echo "  ou :"
-    echo "    npm install -g @vivliostyle/cli"
-    echo ""
-fi

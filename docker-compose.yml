@@ -7,7 +7,6 @@ services:
       - TAMPON_DIR=/app
       - TIRAGES_DIR=/app/tirages
       - LOGS_DIR=/app/logs
-      - CHROMIUM_PATH=/usr/bin/chromium
     volumes:
       - ./tirages:/app/tirages
       - ./logs:/app/logs

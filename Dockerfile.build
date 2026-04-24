@@ -4,20 +4,22 @@ WORKDIR /app
 
 COPY package.json bun.lock* ./
 RUN bun install
+RUN bun add @vivliostyle/cli
 
 COPY server.ts .
 COPY src/ ./src/
 COPY gabarits/ ./gabarits/
 COPY ui/ ./ui/
 
-RUN mkdir -p dist \
-  && bun build --compile server.ts --outfile dist/tampon
+RUN bun build server.ts --outfile dist/server.js --target=bun --external=@vivliostyle/cli \
+  && echo "server.js : $(du -sh dist/server.js | cut -f1)"
 
-# Stage export : binaire + assets dans /bundle
+# Stage export : bundle + assets dans /bundle
 FROM debian:bookworm-slim AS export
-COPY --from=builder /app/dist/tampon  /bundle/tampon
-COPY --from=builder /app/gabarits/    /bundle/gabarits/
-COPY --from=builder /app/ui/          /bundle/ui/
+COPY --from=builder /app/dist/server.js  /bundle/server.js
+COPY --from=builder /usr/local/bin/bun   /bundle/bun
+COPY --from=builder /app/gabarits/       /bundle/gabarits/
+COPY --from=builder /app/ui/             /bundle/ui/
 
 # Stage deb : paquet .deb installable
 FROM debian:bookworm-slim AS deb
@@ -25,14 +27,15 @@ FROM debian:bookworm-slim AS deb
 RUN apt-get update && apt-get install -y --no-install-recommends dpkg-dev \
   && rm -rf /var/lib/apt/lists/*
 
-# Assets du binaire
-COPY --from=builder /app/dist/tampon  /pkg/usr/share/tampon/tampon
-COPY --from=builder /app/gabarits/    /pkg/usr/share/tampon/gabarits/
-COPY --from=builder /app/ui/          /pkg/usr/share/tampon/ui/
+COPY --from=builder /app/dist/server.js       /pkg/usr/share/tampon/server.js
+COPY --from=builder /app/gabarits/            /pkg/usr/share/tampon/gabarits/
+COPY --from=builder /app/ui/                  /pkg/usr/share/tampon/ui/
+COPY --from=builder /app/node_modules/        /pkg/usr/share/tampon/node_modules/
+COPY --from=builder /usr/local/bin/bun        /pkg/usr/share/tampon/bun
 
 # Wrapper dans le PATH
 RUN mkdir -p /pkg/usr/local/bin \
-  && printf '#!/bin/sh\nexec /usr/share/tampon/tampon "$@"\n' \
+  && printf '#!/bin/sh\nexport PUPPETEER_EXECUTABLE_PATH=${PUPPETEER_EXECUTABLE_PATH:-$(which chromium-browser 2>/dev/null || which chromium 2>/dev/null || which google-chrome 2>/dev/null)}\nexec /usr/share/tampon/bun /usr/share/tampon/server.js "$@"\n' \
      > /pkg/usr/local/bin/tampon \
   && chmod 755 /pkg/usr/local/bin/tampon
 
@@ -46,3 +49,9 @@ RUN dpkg-deb --build /pkg /tampon_0.2.0_amd64.deb
 
 FROM scratch AS deb-out
 COPY --from=deb /tampon_0.2.0_amd64.deb /tampon_0.2.0_amd64.deb
+
+# Environnement de test — buildé une fois, mis en cache par Docker
+FROM debian:bookworm-slim AS test-env
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl chromium \
+  && rm -rf /var/lib/apt/lists/*

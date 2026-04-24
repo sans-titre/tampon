@@ -2,13 +2,12 @@ import { $ } from "bun";
 import { mkdirSync, writeFileSync } from "fs";
 import { join, dirname } from "path";
 import { homedir } from "os";
+import { build } from "@vivliostyle/cli";
 import { journal } from "./journal";
 
 const BASE_DIR     = process.env.TAMPON_DIR ?? dirname(process.execPath);
 const GABARITS_DIR = process.env.GABARITS_DIR ?? join(BASE_DIR, "gabarits");
 const TIRAGES_DIR  = process.env.TIRAGES_DIR  ?? join(homedir(), "Documents", "Tampon");
-const VIVLIOSTYLE  = process.env.VIVLIOSTYLE_BIN ?? "vivliostyle";
-const CHROMIUM     = process.env.CHROMIUM_PATH ?? "";
 
 function slugifier(texte: string): string {
   return texte
@@ -59,15 +58,16 @@ export async function composer(
 
   try {
     journal.info(`vivliostyle build → ${nomTirage}`);
-    const proc = CHROMIUM
-      ? await $`${VIVLIOSTYLE} build ${mdPath} --theme ${themePath} -o ${tiragePath} --executable-browser ${CHROMIUM}`
-      : await $`${VIVLIOSTYLE} build ${mdPath} --theme ${themePath} -o ${tiragePath}`;
-    const stdout = proc.stdout.toString().trim();
-    if (stdout) journal.info(stdout);
+    await build({
+      input: mdPath,
+      theme: [themePath],
+      output: tiragePath,
+      sandbox: false,
+    });
   } catch (err: any) {
-    const stderr = (err.stderr?.toString() ?? String(err)).trim();
-    journal.erreur("vivliostyle —", stderr);
-    throw new Error(stderr || "Échec de la composition");
+    const msg = (err?.message ?? String(err)).trim();
+    journal.erreur("vivliostyle —", msg);
+    throw new Error(msg || "Échec de la composition");
   }
 
   await $`rm -rf ${tmpDir}`.quiet();
