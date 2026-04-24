@@ -1,5 +1,8 @@
 # Prochaines étapes
 
+> **Ordre d'exécution :** bundler vivliostyle sans prérequis (v0.3, voir `explore-bun-launcher.md`) → refactoring themes ci-dessous → cross-platform (Mac/Win)
+
+
 ## Refactoring — déléguer à Vivliostyle
 
 ### Contexte
