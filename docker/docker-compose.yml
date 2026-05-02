@@ -1,11 +1,13 @@
 services:
   atelier:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/atelier/Dockerfile
     ports:
       - "3000:3000"
     volumes:
-      - ./tirages:/app/tirages
-      - ./logs:/app/logs
+      - ../tirages:/app/tirages
+      - ../logs:/app/logs
       - ~/.local/share/fonts:/usr/local/share/fonts:ro
     cap_add:
       - SYS_ADMIN

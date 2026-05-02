@@ -7,7 +7,7 @@ RENDUS  := $(patsubst diagrammes/%.mmd,rendus/%.png,$(SOURCES))
 all: build $(RENDUS)
 
 build:
-	docker build -t $(IMAGE) .
+	docker build -t $(IMAGE) -f ../docker/doc/Dockerfile .
 
 rendus/%.png: diagrammes/%.mmd | rendus
 	docker run --rm \

@@ -20,8 +20,8 @@ RUN bun install
 
 COPY . .
 
-RUN mkdir -p tirages && chmod +x entrypoint.sh
+RUN mkdir -p tirages && chmod +x docker/atelier/entrypoint.sh
 
 EXPOSE 3000
 
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["./docker/atelier/entrypoint.sh"]
