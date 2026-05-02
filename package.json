@@ -1,9 +1,11 @@
 {
-  "name": "sans-titre-docs",
-  "version": "0.1.0",
+  "name": "sans-titre-tampon",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "bun run server.ts"
   },
-  "dependencies": {}
+  "dependencies": {
+    "marked": "^15.0.0"
+  }
 }

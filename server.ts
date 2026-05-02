@@ -24,6 +24,19 @@ serve({
       });
     }
 
+    if (req.method === "GET" && pathname === `${BASE}/ui/vendor/paged.polyfill.js`) {
+      return new Response(file("./ui/vendor/paged.polyfill.js"), {
+        headers: { "Content-Type": "application/javascript; charset=utf-8" },
+      });
+    }
+
+    if (req.method === "GET" && pathname.startsWith(`${BASE}/gabarits/`)) {
+      const nom = pathname.replace(`${BASE}/gabarits/`, "");
+      return new Response(file(`./gabarits/${nom}`), {
+        headers: { "Content-Type": "text/css; charset=utf-8" },
+      });
+    }
+
     if (req.method === "GET" && pathname.startsWith(`${BASE}/tirages/`)) {
       const nom = pathname.replace(`${BASE}/tirages/`, "");
       const chemin = `./tirages/${nom}`;

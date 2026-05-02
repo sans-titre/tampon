@@ -9,11 +9,10 @@ RUN apt-get update && apt-get install -y \
 
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
 WORKDIR /app
 
-RUN bun add -g @vivliostyle/cli
+RUN bun add -g pagedjs-cli
 
 COPY package.json bun.lock* ./
 RUN bun install

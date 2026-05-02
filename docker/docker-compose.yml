@@ -1,5 +1,8 @@
+name: tampon
+
 services:
   atelier:
+    container_name: tampon-atelier
     build:
       context: ..
       dockerfile: docker/atelier/Dockerfile
@@ -8,7 +11,4 @@ services:
     volumes:
       - ../tirages:/app/tirages
       - ../logs:/app/logs
-      - ~/.local/share/fonts:/usr/local/share/fonts:ro
-    cap_add:
-      - SYS_ADMIN
     restart: unless-stopped
