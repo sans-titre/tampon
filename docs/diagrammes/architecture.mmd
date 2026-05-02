@@ -1,70 +1,57 @@
 flowchart LR
-    U(["`**Navigateur**
-    UI HTML/JS vanilla
-    saisie markdown + meta`"])
+    USER(["`**Navigateur**
+    formulaire
+    MD + meta + gabarit`"])
 
-    subgraph srv [Bun]
+    subgraph DOCKER["Image Docker · oven/bun:1-debian"]
+
         SRV["`**server.ts**
-        serveur HTTP local
-        route les requêtes,
-        sert les fichiers statiques`"]
+        HTTP · routing
+        fichiers statiques`"]
+
+        subgraph SRC["src/"]
+            direction TB
+            C["`**composer.ts**
+            orchestration`"]
+            R["`**renderer.ts**
+            MD → HTML
+            *fonction pure*`"]
+            P["`**pdf.ts**
+            HTML → PDF
+            puppeteer + Paged.js`"]
+            C --> R
+            C --> P
+        end
+
+        subgraph ASSETS["ressources embarquées"]
+            direction TB
+            CSS["`**gabarits/*.css**
+            habillage · caracteres`"]
+            FONTS["`**fonts/**
+            Atkinson @font-face`"]
+            POLYFILL["`**ui/vendor/**
+            paged.polyfill.js`"]
+        end
+
+        CHROM["`**/usr/bin/chromium**
+        --no-sandbox`"]
+
     end
 
-    subgraph pipeline [Pipeline]
-        COMP["`**composer.ts**
-        orchestre la composition :
-        préfixe les running elements,
-        appelle Vivliostyle`"]
-        RUNNING["`**entetesRunning**
-        injecte les métadonnées
-        (titre, date, auteur)
-        comme div HTML brut`"]
-    end
+    TIRAGES[("**tirages/**
+    volume monté")]
 
-    subgraph css [CSS]
-        C["`**caracteres.css**
-        tokens typo : fontes,
-        corps, couleurs, marges`"]
-        H["`**habillage.css**
-        éléments réutilisables :
-        bandeau, pied de page,
-        tables, listes`"]
-        G["`**gabarit-*.css**
-        mise en page par format :
-        @page, marges, hiérarchie
-        des titres`"]
-    end
+    USER       -->|"POST /composer"| SRV
+    SRV        -->                   C
+    R          -->|"HTML + Paged.js"| SRV
+    SRV        -->|"preview"| USER
+    P          -->              CHROM
+    CHROM      -->              TIRAGES
+    TIRAGES    -->              SRV
+    SRV        -->|"PDF"| USER
 
-    subgraph rendu [Rendu PDF]
-        VIVO["`**Vivliostyle CLI**
-        convertit Markdown → HTML
-        via VFM, pagine, gère
-        les éléments courants`"]
-        CHROM["`**Chromium headless**
-        imprime le document
-        paginé en PDF`"]
-    end
-
-    FONTS[("`**fonts/**
-    Atkinson Hyperlegible
-    montée depuis
-    ~/.local/share/fonts`")]
-
-    TIRAGES[("`**tirages/**
-    dossier de sortie,
-    PDF nommés et
-    accessibles sur le host`")]
-
-    U -->|"`markdown + meta
-    + gabarit`"| SRV
-    SRV --> COMP
-    COMP --> RUNNING
-    C & H --> G
-    RUNNING -->|"`document.md
-    + --theme gabarit-*.css`"| VIVO
-    G -->|"`--theme`"| VIVO
-    VIVO --> CHROM
-    FONTS --> CHROM
-    CHROM --> TIRAGES
-    TIRAGES -->|stream PDF| SRV
-    SRV -->|PDF| U
+    R          -.->  CSS
+    R          -.->  FONTS
+    R          -.->  POLYFILL
+    P          -.->  POLYFILL
+    P          -.->  CHROM
