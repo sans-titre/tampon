@@ -11,47 +11,38 @@ flowchart LR
 
         subgraph SRC["src/"]
             direction TB
+            R["`**renderer.ts**
+            MD → HTML · *pure*
+            marked + running elements`"]
             C["`**composer.ts**
             orchestration`"]
-            R["`**renderer.ts**
-            MD → HTML
-            *fonction pure*`"]
-            P["`**pdf.ts**
-            HTML → PDF
-            puppeteer + Paged.js`"]
             C --> R
-            C --> P
         end
 
-        subgraph ASSETS["ressources embarquées"]
-            direction TB
-            CSS["`**gabarits/*.css**
-            habillage · caracteres`"]
-            FONTS["`**fonts/**
-            Atkinson @font-face`"]
-            POLYFILL["`**ui/vendor/**
-            paged.polyfill.js`"]
-        end
+        PAGEDJS["`**pagedjs-cli**
+        subprocess
+        HTML → PDF`"]
 
         CHROM["`**/usr/bin/chromium**
-        --no-sandbox`"]
+        via PUPPETEER_EXECUTABLE_PATH`"]
+
+        subgraph ASSETS["gabarits/ · ui/vendor/"]
+            CSS["`**gabarit-*.css**
+            habillage · caracteres`"]
+            POLYFILL["`**paged.polyfill.js**`"]
+        end
 
     end
 
     TIRAGES[("**tirages/**
     volume monté")]
 
-    USER       -->|"POST /composer"| SRV
-    SRV        -->                   C
-    R          -->|"HTML + Paged.js"| SRV
-    SRV        -->|"preview"| USER
-    P          -->              CHROM
-    CHROM      -->              TIRAGES
-    TIRAGES    -->              SRV
-    SRV        -->|"PDF"| USER
+    USER      -->|"POST /composer"| SRV
+    SRV       --> C
+    C         -->|"document.html"| PAGEDJS
+    PAGEDJS   --> CHROM
+    CHROM     -->|"tirage.pdf"| TIRAGES
+    TIRAGES   --> SRV
+    SRV       -->|"PDF"| USER
 
-    R          -.->  CSS
-    R          -.->  FONTS
-    R          -.->  POLYFILL
-    P          -.->  POLYFILL
-    P          -.->  CHROM
+    R         -.-> CSS & POLYFILL
