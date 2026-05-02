@@ -50,13 +50,13 @@ Le contenu du document commence ici...
 
 ![Architecture](docs/rendus/architecture.png)
 
-Le pipeline délègue autant que possible à [Vivliostyle CLI](https://vivliostyle.org/) :
+Le pipeline délègue autant que possible à [Paged.js](https://pagedjs.org/) via `pagedjs-cli` :
 
-- **VFM** (Vivliostyle Flavored Markdown) convertit le `.md` en HTML
+- **`renderer.ts`** convertit le Markdown en HTML via `marked` et injecte les running elements (bandeau, pied de page)
 - **CSS Paged Media** (`@page`, `position: running(...)`) gère la pagination et les éléments courants
-- **Chromium headless** imprime le résultat en PDF
+- **`pagedjs-cli`** pagine le HTML dans Chromium headless et exporte le PDF
 
-`composer.ts` se limite à préfixer les running elements comme HTML brut dans le `.md`, pointer Vivliostyle vers le bon gabarit CSS, et récupérer le PDF produit.
+`composer.ts` orchestre : écrit le HTML dans `/tmp`, appelle `pagedjs-cli` en subprocess, retourne le nom du PDF produit.
 
 ## Prérequis
 
