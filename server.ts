@@ -61,7 +61,7 @@ serve({
       if (!markdown?.trim()) {
         return Response.json({ erreur: "Contenu vide" }, { status: 400 });
       }
-      if (!["rapport", "lettre"].includes(gabarit)) {
+      if (!existsSync(`./gabarits/gabarit-${gabarit}.css`)) {
         return Response.json({ erreur: "Gabarit inconnu" }, { status: 400 });
       }
 

@@ -31,12 +31,17 @@ test: up
 		| grep -q erreur && echo "✓ Rejet contenu vide" || echo "✗ Rejet contenu vide"
 	$(MAKE) down
 
+MD      ?= examples/rapport.md
+GABARIT ?= rapport
+TITRE   ?= Test
+DATE    ?= Mai 2026
+
 debug: up
 	@echo "Attente du démarrage..."
 	@sleep 4
-	@echo "--- Test composition rapport ---"
-	@jq -n --rawfile md examples/rapport.md \
-		'{"markdown": $$md, "gabarit": "rapport", "meta": {"titre": "Rapport test", "date": "Mai 2026"}}' \
+	@echo "--- Composition : gabarit=$(GABARIT) md=$(MD) ---"
+	@jq -n --rawfile md $(MD) \
+		'{"markdown": $$md, "gabarit": "$(GABARIT)", "meta": {"titre": "$(TITRE)", "date": "$(DATE)"}}' \
 		| curl -s -X POST http://localhost:3000/sans-titre.art/tampon/composer \
 		-H "Content-Type: application/json" -d @- ; echo ""
 	@echo "--- Logs conteneur ---"

@@ -1,0 +1,364 @@
+/* ═══════════════════════════════════════════════════════════════════
+   GABARIT-AP.CSS — Style Arnaud Perrot pour tampon / Paged.js
+   ═══════════════════════════════════════════════════════════════════
+
+   Grille A4 — module M = 5mm
+   Marges latérales : 6M = 30mm  (≈ 14.0625% de 210mm)
+   Marge haute      : 7M = 35mm  (running header inclus)
+   Marge basse      : 5M = 25mm
+
+   Échelle typographique (raison 1.25) :
+     9pt corps — 11pt chapô — 14pt H2 — 18pt H1-sub — 34pt H1
+   ═══════════════════════════════════════════════════════════════════ */
+
+
+/* ─── FONTES ──────────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Jost';
+  src: url('fonts/Jost-Heavy.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Jost';
+  src: url('fonts/Jost-Book.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Jost';
+  src: url('fonts/Jost-Hairline.woff2') format('woff2');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('fonts/Inter-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'InterTight';
+  src: url('fonts/InterTight-LightItalic.woff2') format('woff2');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+
+/* ─── TOKENS ──────────────────────────────────────────────────────── */
+
+:root {
+  --M:          5mm;
+  --marge-h:    30mm;
+  --marge-haut: 35mm;
+  --marge-bas:  25mm;
+
+  --filet:      0.4mm;
+  --filet-fin:  0.1mm;
+
+  --encre:      #0a0a0a;
+  --fond:       #ffffff;
+  --gris:       rgba(10, 10, 10, 0.3);
+
+  --t0:   9pt;
+  --t1:  11pt;
+  --t2:  14pt;
+  --t3:  18pt;
+  --t6:  34pt;
+  --t-micro:   6.5pt;
+  --t-caption: 7.5pt;
+}
+
+
+/* ─── PAGE PAGED.JS ───────────────────────────────────────────────── */
+
+@page {
+  size: A4;
+  margin: var(--marge-haut) var(--marge-h) var(--marge-bas);
+  background: var(--fond);
+
+  @top-left {
+    content: element(bandeau-titre-courant);
+    vertical-align: bottom;
+    padding-bottom: 3mm;
+    border-bottom: var(--filet) solid var(--encre);
+    font-family: 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: var(--t-micro);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--encre);
+    opacity: 0.4;
+  }
+
+  @top-right {
+    content: element(bandeau-date-courante);
+    vertical-align: bottom;
+    padding-bottom: 3mm;
+    border-bottom: var(--filet) solid var(--encre);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    font-size: var(--t-micro);
+    color: var(--encre);
+    opacity: 0.3;
+    text-align: right;
+  }
+
+  @top-center {
+    content: "";
+    border-bottom: var(--filet) solid var(--encre);
+    vertical-align: bottom;
+  }
+
+  @bottom-center {
+    content: counter(page) " / " counter(pages);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    font-size: var(--t-caption);
+    color: var(--encre);
+    opacity: 0.3;
+    vertical-align: top;
+    padding-top: 3mm;
+    border-top: var(--filet-fin) solid var(--encre);
+  }
+
+  @bottom-left {
+    content: element(pied-coordonnees);
+    vertical-align: top;
+    padding-top: 3mm;
+    border-top: var(--filet-fin) solid var(--encre);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    font-size: var(--t-caption);
+    color: var(--encre);
+    opacity: 0.3;
+  }
+}
+
+
+/* ─── DOCUMENT ────────────────────────────────────────────────────── */
+
+html {
+  background: var(--fond);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: var(--t0);
+  line-height: 1.6;
+  color: var(--encre);
+  background: var(--fond);
+}
+
+
+/* ─── GRILLE DE CONTRÔLE ─ commenter pour désactiver ─────────────── */
+/*
+   Galop (zone imprimable) : 150mm = 210mm - 2×30mm marges
+   Colonne : 70mm  Gouttière : 10mm
+   Baseline : 5mm (= --M)
+   background-attachment:fixed → répété sur chaque page par Paged.js
+*/
+
+body {
+  background-image:
+    linear-gradient(
+      to right,
+      rgba(0, 80, 255, 0.07) 0,
+      rgba(0, 80, 255, 0.07) 70mm,
+      rgba(255, 0, 80, 0.07) 70mm,
+      rgba(255, 0, 80, 0.07) 80mm,
+      rgba(0, 80, 255, 0.07) 80mm,
+      rgba(0, 80, 255, 0.07) 150mm,
+      transparent 150mm
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 0, 80, 0.08) 0,
+      rgba(255, 0, 80, 0.08) 0.4px,
+      transparent 0.4px,
+      transparent 5mm
+    );
+  background-size: 150mm 100%, 100% 5mm;
+  background-repeat: no-repeat, repeat;
+  background-attachment: fixed;
+}
+
+
+/* ─── ÉLÉMENTS COURANTS (running elements) ────────────────────────── */
+
+.bandeau-nom {
+  position: running(bandeau-nom);
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+  font-size: var(--t-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--encre);
+  opacity: 0.4;
+}
+
+.bandeau-titre-courant {
+  position: running(bandeau-titre-courant);
+}
+
+.bandeau-date-courante {
+  position: running(bandeau-date-courante);
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: var(--t-micro);
+  color: var(--encre);
+  opacity: 0.3;
+}
+
+.pied-coordonnees {
+  position: running(pied-coordonnees);
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: var(--t-caption);
+  color: var(--encre);
+  opacity: 0.3;
+}
+
+
+/* ─── TITRES ──────────────────────────────────────────────────────── */
+
+h1 {
+  font-family: 'Jost', sans-serif;
+  font-weight: 800;
+  font-size: var(--t6);
+  line-height: 1.0;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--encre);
+  margin-top: 0;
+  margin-bottom: calc(var(--M) * 1.2);
+  border-bottom: var(--filet) solid var(--encre);
+  padding-bottom: calc(var(--M) * 1.2);
+}
+
+h2 {
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+  font-size: var(--t2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  color: var(--encre);
+  margin-top: calc(var(--M) * 2);
+  margin-bottom: calc(var(--M) * 0.6);
+}
+
+h3 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: var(--t0);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--encre);
+  opacity: 0.45;
+  margin-top: calc(var(--M) * 1.2);
+  margin-bottom: calc(var(--M) * 0.4);
+}
+
+
+/* ─── CORPS ───────────────────────────────────────────────────────── */
+
+p {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: var(--t0);
+  line-height: 1.6;
+  color: var(--encre);
+  margin-top: 0;
+  margin-bottom: calc(var(--M) * 0.7);
+  orphans: 3;
+  widows: 3;
+}
+
+
+/* ─── LISTES ──────────────────────────────────────────────────────── */
+
+ul, ol {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: var(--t0);
+  line-height: 1.6;
+  margin-left: var(--M);
+  margin-bottom: calc(var(--M) * 0.7);
+}
+
+li { margin-bottom: 0.8mm; }
+
+ul li::marker {
+  content: '— ';
+  font-family: 'Jost', sans-serif;
+  font-weight: 100;
+}
+
+
+/* ─── CITATION ────────────────────────────────────────────────────── */
+
+blockquote {
+  border-left: var(--filet) solid var(--encre);
+  padding-left: calc(var(--M) * 1.2);
+  margin: calc(var(--M) * 1.2) 0;
+}
+
+blockquote p {
+  font-family: 'InterTight', sans-serif;
+  font-style: italic;
+  font-size: var(--t1);
+  line-height: 1.5;
+  opacity: 0.7;
+}
+
+
+/* ─── SÉPARATEUR ──────────────────────────────────────────────────── */
+
+hr {
+  border: none;
+  border-top: var(--filet-fin) solid var(--encre);
+  opacity: 0.3;
+  margin: calc(var(--M) * 1.6) 0;
+}
+
+
+/* ─── CODE ────────────────────────────────────────────────────────── */
+
+code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.88em;
+}
+
+pre {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85em;
+  border-left: var(--filet) solid var(--encre);
+  padding-left: calc(var(--M) * 1.2);
+  margin: calc(var(--M) * 1.2) 0;
+  opacity: 0.7;
+}
+
+pre code { background: none; }
+
+
+/* ─── EMPHASES ────────────────────────────────────────────────────── */
+
+strong {
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+}
+
+em {
+  font-family: 'InterTight', sans-serif;
+  font-style: italic;
+}
