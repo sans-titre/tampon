@@ -1,10 +1,18 @@
-import { $ } from "bun";
-import { mkdirSync, writeFileSync } from "fs";
+import { mkdirSync } from "fs";
 import { join } from "path";
+import { randomUUID } from "crypto";
 import { journal } from "./journal";
 import { rendrePage } from "./renderer";
+import { imprimer } from "./imprimante";
+import { BASE, TIRAGES_DIR } from "./config";
 
-const TIRAGES_DIR = process.env.TIRAGES_DIR ?? "/app/tirages";
+// Pages d'impression en attente : servies une seule fois sur
+// GET {BASE}/imprimer/{jeton} le temps que Chromium les charge.
+const pagesEnAttente = new Map<string, string>();
+
+export function obtenirPageImpression(jeton: string): string | undefined {
+  return pagesEnAttente.get(jeton);
+}
 
 function slugifier(texte: string): string {
   return texte
@@ -27,29 +35,23 @@ export async function composer(
   gabarit: string,
   meta: Record<string, string> = {},
   nomFichier: string | null = null,
+  port: number,
 ): Promise<string> {
-  const horodatage = Date.now();
-  const tmpDir = `/tmp/atelier-${horodatage}`;
-  mkdirSync(tmpDir, { recursive: true });
   mkdirSync(TIRAGES_DIR, { recursive: true });
-
-  const html = rendrePage(markdown, gabarit, meta);
-  const htmlPath = join(tmpDir, "document.html");
-  writeFileSync(htmlPath, html, "utf-8");
 
   const nomTirage = nomFichierTirage(nomFichier, meta);
   const tiragePath = join(TIRAGES_DIR, nomTirage);
 
-  try {
-    journal.info(`pagedjs-cli → ${nomTirage}`);
-    await $`pagedjs-cli ${htmlPath} -o ${tiragePath} --browserArgs --no-sandbox,--disable-dev-shm-usage`.quiet();
-  } catch (err: any) {
-    const stderr = (err.stderr?.toString() ?? String(err)).trim();
-    journal.erreur("pagedjs-cli —", stderr);
-    throw new Error(stderr || "Échec de la composition");
-  }
+  const jeton = randomUUID();
+  pagesEnAttente.set(jeton, rendrePage(markdown, gabarit, meta));
+  const urlImpression = `http://127.0.0.1:${port}${BASE}/imprimer/${jeton}`;
 
-  await $`rm -rf ${tmpDir}`.quiet();
+  try {
+    journal.info(`Impression → ${nomTirage}`);
+    await imprimer(urlImpression, tiragePath);
+  } finally {
+    pagesEnAttente.delete(jeton);
+  }
 
   return nomTirage;
 }

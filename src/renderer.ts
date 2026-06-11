@@ -1,6 +1,5 @@
 import { marked } from "marked";
-
-const GABARITS_DIR = process.env.GABARITS_DIR ?? "/app/gabarits";
+import { BASE } from "./config";
 
 export function rendrePage(
   markdown: string,
@@ -15,7 +14,14 @@ export function rendrePage(
 <head>
   <meta charset="utf-8">
   <title>${titre}</title>
-  <link rel="stylesheet" href="${GABARITS_DIR}/gabarit-${gabarit}.css">
+  <link rel="stylesheet" href="${BASE}/gabarits/gabarit-${gabarit}.css">
+  <script>
+    window.PagedConfig = {
+      auto: true,
+      after: () => { window.__tamponRendu = true; },
+    };
+  </script>
+  <script src="${BASE}/ui/vendor/paged.polyfill.js"></script>
 </head>
 <body>
   <div class="bandeau-nom" aria-hidden="true">sans-titre</div>
