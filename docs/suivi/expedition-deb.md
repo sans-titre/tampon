@@ -85,7 +85,27 @@ Docker reste l'environnement dev/CI avec le **même pipeline CDP**
 
 ## Validation
 
-- `make test` — pipeline CDP dans Docker (UI, composition rapport, rejet vide).
+- `make test` — pipeline CDP dans Docker (UI, compositions rapport et AP,
+  rejet vide) ; code de sortie réel, utilisé comme barrière CI.
 - `make test-deb` — installation du `.deb` dans `debian:bookworm` et
   `ubuntu:24.04` vierges, composition `rapport.md` (2 pages) et `ap-test.md`
   (3 pages, fontes Jost/Inter embarquées vérifiées par `pdffonts`), rejet vide.
+- `make essai-deb` — essai interactif : conteneur vierge, UI ouverte dans le
+  navigateur hôte, tirages dans `./tirages/`.
+
+## CI/CD (GitHub Actions)
+
+Les workflows réutilisent l'infra locale telle quelle :
+
+- **`ci.yml`** (push/PR) — `make test`, puis `make paquet` + `make test-deb`
+  avec cache du zip chrome-headless-shell (clé dérivée du script de build :
+  invalidée quand `CHS_VERSION` change) ; le `.deb` de chaque run est
+  téléchargeable en artefact.
+- **`release.yml`** (tag `v*`) — vérifie la cohérence tag ↔ `package.json`,
+  reconstruit et revalide, puis publie la release GitHub : `.deb`,
+  `SHA256SUMS`, attestation de provenance (supply chain), `--prerelease`
+  automatique si le tag contient un tiret (`v0.3.0-alpha.1`).
+
+Versionnage pré-release : `0.3.0-alpha.1` (npm/tag) devient `0.3.0~alpha.1`
+côté Debian — le tilde trie avant `0.3.0`, apt proposera bien la mise à jour
+vers la version finale.

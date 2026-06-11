@@ -12,7 +12,10 @@ apt-get update -qq
 apt-get install -y -qq --no-install-recommends unzip curl ca-certificates > /dev/null
 
 VERSION=$(bun -e 'console.log(require("./package.json").version)')
-echo "— tampon ${VERSION} / chrome-headless-shell ${CHS_VERSION}"
+# Pré-release npm (0.3.0-alpha.1) → version Debian (0.3.0~alpha.1) :
+# le tilde trie AVANT la version finale, sémantique apt correcte.
+DEB_VERSION=$(printf '%s' "$VERSION" | tr '-' '~')
+echo "— tampon ${DEB_VERSION} / chrome-headless-shell ${CHS_VERSION}"
 
 echo "— compilation du binaire"
 bun install --silent
@@ -48,7 +51,7 @@ chmod 755 "$DEB/usr/bin/tampon"
 TAILLE_KO=$(du -sk "$DEB/usr" | cut -f1)
 cat > "$DEB/DEBIAN/control" <<EOF
 Package: tampon
-Version: ${VERSION}
+Version: ${DEB_VERSION}
 Section: text
 Priority: optional
 Architecture: amd64
@@ -62,7 +65,7 @@ Description: Atelier de composition typographique Markdown vers PDF
  chrome-headless-shell embarqués, aucune dépendance à un navigateur installé.
 EOF
 
-dpkg-deb --build --root-owner-group "$DEB" "dist/tampon_${VERSION}_amd64.deb" > /dev/null
+dpkg-deb --build --root-owner-group "$DEB" "dist/tampon_${DEB_VERSION}_amd64.deb" > /dev/null
 
 # Le conteneur tourne en root : rendre les artefacts à l'utilisateur hôte.
 chown -R "$(stat -c %u:%g /src)" dist build

@@ -1,11 +1,15 @@
 # sans-titre — atelier de composition
 
+[![CI](https://github.com/sans-titre/tampon/actions/workflows/ci.yml/badge.svg)](https://github.com/sans-titre/tampon/actions/workflows/ci.yml)
+
 Générateur de PDFs typographiques à partir de Markdown. On colle du texte, on choisit un gabarit, on récupère un PDF prêt à imprimer.
 
 ## Installer (Linux)
 
+Télécharger le `.deb` de la [dernière release](https://github.com/sans-titre/tampon/releases), puis :
+
 ```bash
-sudo apt install ./tampon_0.3.0_amd64.deb
+sudo apt install ./tampon_0.3.0~alpha.1_amd64.deb
 tampon
 ```
 
@@ -13,7 +17,20 @@ Le navigateur s'ouvre sur l'atelier. Les PDFs sont enregistrés dans `~/Document
 
 Le paquet est **autonome** : serveur compilé et moteur de rendu `chrome-headless-shell` embarqués, aucun navigateur ni runtime à installer. Validé sur Debian bookworm et Ubuntu 24.04 (voir [docs/suivi/expedition-deb.md](docs/suivi/expedition-deb.md)).
 
-Pour construire le paquet : `make paquet` (→ `dist/`), puis `make test-deb` pour le valider dans des conteneurs vierges.
+Pour construire le paquet : `make paquet` (→ `dist/`), puis `make test-deb` pour le valider dans des conteneurs vierges, ou `make essai-deb` pour l'essayer dans le navigateur depuis un conteneur.
+
+## Publier une release
+
+Le CI (GitHub Actions) rejoue `make test`, `make paquet` et `make test-deb` à chaque push. Pour publier :
+
+```bash
+# 1. aligner la version (pré-release : suffixe -alpha.N / -beta.N)
+#    package.json : "version": "0.3.0-alpha.2"
+# 2. taguer et pousser
+git tag v0.3.0-alpha.2 && git push origin v0.3.0-alpha.2
+```
+
+Le workflow `release.yml` reconstruit le paquet, le revalide sur distributions vierges, et publie la release GitHub (pré-release si le tag contient un tiret) avec le `.deb`, les sommes SHA-256 et une attestation de provenance.
 
 ## Lancer en développement
 

@@ -29,21 +29,9 @@ test-deb:
 essai-deb:
 	bash scripts/essayer-deb.sh
 
+# Échoue réellement (code de sortie propagé) — utilisable comme barrière CI.
 test: up
-	@echo "Attente du démarrage..."
-	@sleep 4
-	@curl -sf http://localhost:3000/sans-titre.art/tampon > /dev/null \
-		&& echo "✓ UI" || echo "✗ UI"
-	@jq -n --rawfile md examples/rapport.md \
-		'{"markdown": $$md, "gabarit": "rapport", "meta": {"titre": "Rapport test", "date": "Mai 2026"}}' \
-		| curl -sf -X POST http://localhost:3000/sans-titre.art/tampon/composer \
-		-H "Content-Type: application/json" -d @- \
-		| grep -q tirage && echo "✓ Composition rapport" || echo "✗ Composition rapport"
-	@curl -s -X POST http://localhost:3000/sans-titre.art/tampon/composer \
-		-H "Content-Type: application/json" \
-		-d '{"markdown": "", "gabarit": "rapport", "meta": {}}' \
-		| grep -q erreur && echo "✓ Rejet contenu vide" || echo "✗ Rejet contenu vide"
-	$(MAKE) down
+	@bash scripts/tester-serveur.sh; etat=$$?; $(MAKE) down; exit $$etat
 
 MD      ?= examples/rapport.md
 GABARIT ?= rapport

@@ -1,0 +1,50 @@
+# Intégration continue — réutilise l'infra locale telle quelle :
+# make test (pipeline CDP en Docker) et make paquet / make test-deb
+# (.deb installé dans debian:bookworm et ubuntu:24.04 vierges).
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Pipeline CDP (Docker dev)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: make test
+        run: make test
+
+  paquet:
+    name: Paquet .deb + distributions vierges
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Cache chrome-headless-shell (version épinglée)
+        uses: actions/cache@v5
+        with:
+          path: dist/cache
+          key: chs-${{ hashFiles('scripts/construire-deb-interne.sh') }}
+
+      - name: make paquet
+        run: make paquet
+
+      - name: make test-deb
+        run: make test-deb
+
+      - name: Artefact .deb (téléchargeable depuis le run)
+        uses: actions/upload-artifact@v7
+        with:
+          name: tampon-deb
+          path: dist/tampon_*_amd64.deb
+          if-no-files-found: error
