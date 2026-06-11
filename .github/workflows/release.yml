@@ -41,6 +41,14 @@ jobs:
       - name: make test-deb
         run: make test-deb
 
+      # GitHub remplace ~ dans les noms d'assets : on nomme l'artefact
+      # d'après le tag (tiret), la version Debian interne reste en tilde.
+      - name: Nom d'artefact sans tilde
+        run: |
+          SRC=$(ls dist/tampon_*_amd64.deb)
+          ART="dist/tampon_${GITHUB_REF_NAME#v}_amd64.deb"
+          [ "$SRC" = "$ART" ] || mv "$SRC" "$ART"
+
       - name: Sommes de contrôle
         run: cd dist && sha256sum tampon_*_amd64.deb > SHA256SUMS
 
