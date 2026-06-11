@@ -24,6 +24,11 @@ paquet:
 test-deb:
 	bash scripts/tester-deb.sh
 
+# Essai interactif : .deb installé dans un conteneur vierge, UI ouverte dans
+# le navigateur hôte, tirages dans ./tirages/ (IMAGE=debian:bookworm, PORT=…)
+essai-deb:
+	bash scripts/essayer-deb.sh
+
 test: up
 	@echo "Attente du démarrage..."
 	@sleep 4
