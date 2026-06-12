@@ -1,13 +1,25 @@
 import { marked } from "marked";
 import { BASE } from "./config";
 
+// Les méta viennent du formulaire : neutraliser ce qui casserait le HTML
+// de la page d'impression (<, &, guillemets dans un attribut).
+function echapper(texte: string): string {
+  return texte
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export function rendrePage(
   markdown: string,
   gabarit: string,
   meta: Record<string, string>,
 ): string {
   const corps = marked.parse(markdown) as string;
-  const { titre = "", date = "", auteur = "" } = meta;
+  const titre = echapper(meta.titre ?? "");
+  const date = echapper(meta.date ?? "");
+  const auteur = echapper(meta.auteur ?? "");
 
   return `<!DOCTYPE html>
 <html lang="fr">
@@ -18,7 +30,11 @@ export function rendrePage(
   <script>
     window.PagedConfig = {
       auto: true,
-      after: () => { window.__tamponRendu = true; },
+      after: () => {
+        window.__tamponRendu = true;
+        // Liaison CDP posée par l'imprimante — absente en aperçu navigateur.
+        if (typeof window.__tamponSignal === "function") window.__tamponSignal("rendu");
+      },
     };
   </script>
   <script src="${BASE}/ui/vendor/paged.polyfill.js"></script>
