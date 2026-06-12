@@ -143,7 +143,14 @@ horodatage court ; replier sur `tirage-<timestamp>` quand le slug est vide.
     elle, suit le système de fichiers). Une route `GET /gabarits` (readdir)
     alimentant le `<select>` ramène à une seule source de vérité — et
     remplace le garde `includes("/")` par une vraie liste blanche.
-19. Mineurs : `essai-deb` absent du `.PHONY` ; `apt-get install` à chaque
+19. **Linting + formatage automatique** : aucun outillage de style aujourd'hui
+    (indentation et conventions tenues à la main). Câbler un linter + un
+    formateur — `biome` (un seul binaire, rapide, lint + format, natif
+    TypeScript/Bun) en première intention, sinon `eslint` + `prettier`.
+    `make lint` / `make format`, une étape `biome ci` dans `ci.yml`, et un
+    hook `pre-commit` optionnel. Fige le style avant que des contributeurs
+    pairs n'arrivent — diffs propres, plus de débats de forme en revue.
+20. Mineurs : `essai-deb` absent du `.PHONY` ; `apt-get install` à chaque
     `make paquet` (une image de build dédiée à 4 lignes le met en cache) ;
     commentaire de `pagesEnAttente` (« servies une seule fois ») inexact —
     purge au `finally`, pas à la lecture.
