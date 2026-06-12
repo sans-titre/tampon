@@ -1,5 +1,12 @@
 # Revue de code — branche `feat/expedition-deb` (avant release stable)
 
+> **État (12 juin 2026)** : les 20 constats sont intégrés. P2.8 est résolu
+> par construction via P3.12 (liaison CDP `Runtime.addBinding` au lieu du
+> sondage). P3.14 reste un compromis documenté (commentaire d'en-tête de
+> `imprimante.ts`) — le Chromium chaud attendra le mode lot. S'y ajoute,
+> hors revue : test de **désinstallation propre** du paquet dans
+> `tester-deb-interne.sh` (purge + assertions zéro résidu), rejoué par le CI.
+
 Revue multi-angles (lecture ligne à ligne, audit des comportements supprimés,
 traçage inter-fichiers, réutilisation, simplification, efficacité, altitude),
 chaque constat contre-vérifié sur le code. Périmètre : tout le diff vs `main`

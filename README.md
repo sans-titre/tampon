@@ -21,7 +21,7 @@ Pour construire le paquet : `make paquet` (→ `dist/`), puis `make test-deb` po
 
 ## Publier une release
 
-Le CI (GitHub Actions) rejoue `make test`, `make paquet` et `make test-deb` à chaque push. Pour publier :
+Le CI (GitHub Actions) rejoue `make lint`, `make test`, `make paquet` et `make test-deb` (installation, composition **et désinstallation propre** sur distributions vierges) à chaque push. Pour publier :
 
 ```bash
 # 1. aligner la version (pré-release : suffixe -alpha.N / -beta.N)
