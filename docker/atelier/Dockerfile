@@ -14,6 +14,9 @@ ENV TIRAGES_DIR=/app/tirages
 ENV LOGS_DIR=/app/logs
 ENV TAMPON_SANS_NAVIGATEUR=1
 ENV PORT=3000
+# Le serveur écoute en boucle locale par défaut ; en conteneur, le mapping
+# de port exige toutes les interfaces.
+ENV TAMPON_HOTE=0.0.0.0
 
 WORKDIR /app
 

@@ -41,5 +41,7 @@ docker run --rm -i $TTY \
     apt-get update -qq > /dev/null
     apt-get install -y -qq /tmp/tampon.deb > /dev/null 2>&1
     echo "✓ installé — démarrage de tampon"
-    exec env TAMPON_SANS_NAVIGATEUR=1 PORT=3000 tampon
+    # TAMPON_HOTE : le serveur écoute en boucle locale par défaut, mais le
+    # mapping de port du conteneur vers l hôte exige toutes les interfaces.
+    exec env TAMPON_SANS_NAVIGATEUR=1 PORT=3000 TAMPON_HOTE=0.0.0.0 tampon
   '
