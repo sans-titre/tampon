@@ -13,6 +13,7 @@ const TYPES_MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
+  ".svg": "image/svg+xml",
   ".woff2": "font/woff2",
   ".ttf": "font/ttf",
   ".pdf": "application/pdf",
@@ -49,6 +50,11 @@ async function traiter(req: Request, port: number): Promise<Response> {
 
   if (req.method === "GET" && pathname === `${BASE}/gabarits`) {
     return Response.json(listerGabarits());
+  }
+
+  // Identité de l'instance : permet à un second lancement de la détecter.
+  if (req.method === "GET" && pathname === `${BASE}/sante`) {
+    return Response.json({ application: "tampon" });
   }
 
   if (req.method === "GET" && pathname.startsWith(`${BASE}/ui/`)) {
@@ -134,6 +140,37 @@ function demarrer() {
     }
   }
   throw derniereErreur ?? new Error("Aucun port disponible");
+}
+
+// Lancé depuis le menu d'applications alors qu'un tampon tourne déjà :
+// rouvrir l'atelier existant plutôt que d'empiler un second serveur.
+async function instanceExistante(): Promise<string | null> {
+  const sondes = Array.from({ length: 20 }, (_, i) => 3000 + i).map(async (port) => {
+    try {
+      const reponse = await fetch(`http://127.0.0.1:${port}${BASE}/sante`, {
+        signal: AbortSignal.timeout(300),
+      });
+      const corps = (await reponse.json()) as { application?: string };
+      return corps.application === "tampon" ? `http://localhost:${port}${BASE}` : null;
+    } catch {
+      return null; // port libre ou occupé par autre chose
+    }
+  });
+  return (await Promise.all(sondes)).find((url) => url) ?? null;
+}
+
+// PORT imposé ou sans navigateur (tests, conteneurs) : pas de réutilisation.
+if (!process.env.PORT && !process.env.TAMPON_SANS_NAVIGATEUR) {
+  const existante = await instanceExistante();
+  if (existante) {
+    journal.info(`Atelier déjà ouvert → ${existante} — réouverture du navigateur`);
+    try {
+      Bun.spawn(["xdg-open", existante], { stdout: "ignore", stderr: "ignore" });
+    } catch {
+      // pas de navigateur — l'URL est dans le journal
+    }
+    process.exit(0);
+  }
 }
 
 const serveur = demarrer();

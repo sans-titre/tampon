@@ -24,3 +24,6 @@ echo "✓ Rejet gabarit absent"
 
 curl -s "$BASE_URL/gabarits" | jq -e 'index("rapport") and index("ap")' > /dev/null
 echo "✓ Liste des gabarits"
+
+curl -s "$BASE_URL/sante" | jq -e '.application == "tampon"' > /dev/null
+echo "✓ Sonde de santé"

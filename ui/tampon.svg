@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Tampon encreur, monochrome — icône du menu d'applications et favicon de l'UI. -->
+  <rect width="64" height="64" rx="14" fill="#f4f4f2"/>
+  <g fill="#1a1a1a">
+    <circle cx="32" cy="14" r="5"/>
+    <rect x="29.5" y="17" width="5" height="8" rx="1"/>
+    <path d="M27 25h10c0 5 7 5 7 11H20c0-6 7-6 7-11z"/>
+    <rect x="17" y="38" width="30" height="7" rx="2"/>
+    <rect x="20" y="50" width="24" height="3" rx="1.5"/>
+    <rect x="25" y="56" width="14" height="3" rx="1.5"/>
+  </g>
+</svg>

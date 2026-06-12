@@ -69,6 +69,7 @@ jobs:
             echo "tampon"
             echo '```'
             echo
+            echo "Tampon apparaît aussi dans le menu d'applications du bureau."
             echo "Paquet **autonome** : serveur et moteur de rendu embarqués, aucun prérequis."
             echo "Les PDFs sont enregistrés dans \`~/Documents/Tampon/\`."
             echo

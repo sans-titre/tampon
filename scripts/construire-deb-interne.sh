@@ -47,6 +47,24 @@ exec /usr/lib/tampon/bin/tampon "$@"
 EOF
 chmod 755 "$DEB/usr/bin/tampon"
 
+# Entrée de menu + icône : tampon est référencé dans le pool d'applications
+# du bureau. Lancé sans terminal, le serveur ouvre lui-même le navigateur ;
+# un second lancement réutilise l'instance en cours (sonde /sante).
+mkdir -p "$DEB/usr/share/applications" "$DEB/usr/share/icons/hicolor/scalable/apps"
+cp ui/tampon.svg "$DEB/usr/share/icons/hicolor/scalable/apps/tampon.svg"
+cat > "$DEB/usr/share/applications/tampon.desktop" <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Tampon
+Comment=Composer des PDF prêts à imprimer à partir de Markdown
+Exec=tampon
+Icon=tampon
+Terminal=false
+Categories=Office;Publishing;
+Keywords=markdown;pdf;impression;gabarit;composition;
+StartupNotify=false
+EOF
+
 TAILLE_KO=$(du -sk "$DEB/usr" | cut -f1)
 cat > "$DEB/DEBIAN/control" <<EOF
 Package: tampon

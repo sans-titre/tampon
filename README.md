@@ -15,6 +15,8 @@ tampon
 
 Le navigateur s'ouvre sur l'atelier. Les PDFs sont enregistrés dans `~/Documents/Tampon/`.
 
+Tampon apparaît aussi dans le menu d'applications du bureau ; relancer alors qu'une instance tourne déjà rouvre simplement l'atelier en cours.
+
 Le paquet est **autonome** : serveur compilé et moteur de rendu `chrome-headless-shell` embarqués, aucun navigateur ni runtime à installer. Validé sur Debian bookworm et Ubuntu 24.04 (voir [docs/suivi/expedition-deb.md](docs/suivi/expedition-deb.md)).
 
 Pour construire le paquet : `make paquet` (→ `dist/`), puis `make test-deb` pour le valider dans des conteneurs vierges, ou `make essai-deb` pour l'essayer dans le navigateur depuis un conteneur.
