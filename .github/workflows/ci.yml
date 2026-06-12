@@ -13,6 +13,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    name: Lint + format (biome)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: make lint
+        run: make lint
+
   test:
     name: Pipeline CDP (Docker dev)
     runs-on: ubuntu-latest

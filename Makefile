@@ -1,4 +1,4 @@
-.PHONY: build up down dev doc test debug paquet test-deb essai-deb
+.PHONY: build up down dev doc test debug paquet test-deb essai-deb lint format
 
 build:
 	docker compose -f docker/docker-compose.yml build
@@ -32,6 +32,15 @@ essai-deb:
 # Échoue réellement (code de sortie propagé) — utilisable comme barrière CI.
 test: up
 	@bash scripts/tester-serveur.sh; etat=$$?; $(MAKE) down; exit $$etat
+
+# Lint + format (biome) dans le conteneur bun — aucune installation locale.
+lint:
+	docker run --rm -u "$$(id -u):$$(id -g)" -e HOME=/tmp -v "$$PWD":/src -w /src \
+		oven/bun:1-debian sh -c "bun install --silent && bun run lint"
+
+format:
+	docker run --rm -u "$$(id -u):$$(id -g)" -e HOME=/tmp -v "$$PWD":/src -w /src \
+		oven/bun:1-debian sh -c "bun install --silent && bun run format"
 
 MD      ?= examples/rapport.md
 GABARIT ?= rapport
