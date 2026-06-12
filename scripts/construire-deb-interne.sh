@@ -1,19 +1,18 @@
 #!/usr/bin/env bash
-# Exécuté DANS le conteneur oven/bun:1-debian par construire-deb.sh.
+# Exécuté DANS l'image tampon-construction par construire-deb.sh.
 # 1. compile le serveur en binaire autonome (bun build --compile)
 # 2. télécharge chrome-headless-shell (version épinglée, Chrome for Testing)
 # 3. assemble l'arborescence .deb et appelle dpkg-deb
 set -euo pipefail
 
-CHS_VERSION="149.0.7827.115"
+# Version unique, lue aussi par la clé de cache CI (hashFiles sur ce fichier).
+CHS_VERSION=$(cat "$(dirname "$0")/chs-version")
 CHS_URL="https://storage.googleapis.com/chrome-for-testing-public/${CHS_VERSION}/linux64/chrome-headless-shell-linux64.zip"
 
-apt-get update -qq
-apt-get install -y -qq --no-install-recommends unzip curl ca-certificates > /dev/null
-
 VERSION=$(bun -e 'console.log(require("./package.json").version)')
-# Pré-release npm (0.3.0-alpha.1) → version Debian (0.3.0~alpha.1) :
-# le tilde trie AVANT la version finale, sémantique apt correcte.
+# Pré-release npm (0.3.0-alpha.1) → champ Version Debian (0.3.0~alpha.1) :
+# le tilde trie AVANT la version finale, sémantique apt correcte. Le nom de
+# FICHIER garde le tiret (GitHub remplacerait le tilde dans les assets).
 DEB_VERSION=$(printf '%s' "$VERSION" | tr '-' '~')
 echo "— tampon ${DEB_VERSION} / chrome-headless-shell ${CHS_VERSION}"
 
@@ -65,7 +64,7 @@ Description: Atelier de composition typographique Markdown vers PDF
  chrome-headless-shell embarqués, aucune dépendance à un navigateur installé.
 EOF
 
-dpkg-deb --build --root-owner-group "$DEB" "dist/tampon_${DEB_VERSION}_amd64.deb" > /dev/null
+dpkg-deb --build --root-owner-group "$DEB" "dist/tampon_${VERSION}_amd64.deb" > /dev/null
 
 # Le conteneur tourne en root : rendre les artefacts à l'utilisateur hôte.
 chown -R "$(stat -c %u:%g /src)" dist build

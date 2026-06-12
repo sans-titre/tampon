@@ -34,7 +34,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: dist/cache
-          key: chs-${{ hashFiles('scripts/construire-deb-interne.sh') }}
+          key: chs-${{ hashFiles('scripts/chs-version') }}
 
       - name: make paquet
         run: make paquet
