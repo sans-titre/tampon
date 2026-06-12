@@ -1,0 +1,86 @@
+# Release — déclenchée par un tag v* (ex. v0.3.0-alpha.1).
+# Reconstruit le .deb, le revalide sur distributions vierges, publie une
+# release GitHub (pré-release si le tag contient un tiret) avec sommes de
+# contrôle et attestation de provenance (supply chain, dépôt public).
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    name: Construire, tester, publier
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Cohérence tag ↔ version package.json
+        run: |
+          VERSION=$(jq -r .version package.json)
+          if [ "v${VERSION}" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error::tag ${GITHUB_REF_NAME} ≠ package.json v${VERSION}"
+            exit 1
+          fi
+
+      - name: Cache chrome-headless-shell (version épinglée)
+        uses: actions/cache@v5
+        with:
+          path: dist/cache
+          key: chs-${{ hashFiles('scripts/chs-version') }}
+
+      - name: make paquet
+        run: make paquet
+
+      - name: make test-deb
+        run: make test-deb
+
+      - name: Chronométrage → résumé du run
+        run: make chrono-deb | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Sommes de contrôle
+        run: cd dist && sha256sum tampon_*_amd64.deb > SHA256SUMS
+
+      - name: Attestation de provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: dist/tampon_*_amd64.deb
+
+      - name: Publier la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            *-*) PRERELEASE="--prerelease" ;;
+            *)   PRERELEASE="" ;;
+          esac
+          DEB=$(basename dist/tampon_*_amd64.deb)
+          {
+            echo "## Installation (Debian / Ubuntu, amd64)"
+            echo
+            echo '```bash'
+            echo "sudo apt install ./${DEB}"
+            echo "tampon"
+            echo '```'
+            echo
+            echo "Tampon apparaît aussi dans le menu d'applications du bureau."
+            echo "Paquet **autonome** : serveur et moteur de rendu embarqués, aucun prérequis."
+            echo "Les PDFs sont enregistrés dans \`~/Documents/Tampon/\`."
+            echo
+            echo "Validé automatiquement sur \`debian:bookworm\` et \`ubuntu:24.04\` vierges."
+            echo "Intégrité : \`sha256sum -c SHA256SUMS\` · provenance : onglet *Attestations* du dépôt."
+            echo
+          } > notes-release.md
+          gh release create "${GITHUB_REF_NAME}" \
+            dist/tampon_*_amd64.deb \
+            dist/SHA256SUMS \
+            --title "tampon ${GITHUB_REF_NAME}" \
+            --notes-file notes-release.md \
+            --generate-notes \
+            ${PRERELEASE}
