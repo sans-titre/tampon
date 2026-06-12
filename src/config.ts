@@ -3,14 +3,14 @@
 //   docker  : env posés par le Dockerfile (/app/...)
 //   .deb    : env posés par le wrapper /usr/bin/tampon (/usr/lib/tampon/share)
 
-import { join } from "path";
 import { homedir } from "os";
+import { join } from "path";
 
 export const BASE = "/sans-titre.art/tampon";
 
 const RACINE = process.env.TAMPON_RACINE ?? ".";
 
-export const UI_DIR = process.env.UI_DIR ?? join(RACINE, "ui");
-export const GABARITS_DIR = process.env.GABARITS_DIR ?? join(RACINE, "gabarits");
+export const UI_DIR = join(RACINE, "ui");
+export const GABARITS_DIR = join(RACINE, "gabarits");
 export const TIRAGES_DIR = process.env.TIRAGES_DIR ?? join(homedir(), "Documents", "Tampon");
 export const LOGS_DIR = process.env.LOGS_DIR ?? join(homedir(), ".local", "state", "tampon");
