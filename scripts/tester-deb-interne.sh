@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Exécuté DANS un conteneur vierge par tester-deb.sh.
+# Exécuté DANS un conteneur vierge par tester-deb.sh
+# (lib-test.sh est monté à côté de ce script).
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
-BASE_URL="http://localhost:3000/sans-titre.art/tampon"
+source "$(dirname "$0")/lib-test.sh"
 
 trap 'echo "— journal serveur —"; cat /tmp/tampon.log 2>/dev/null' ERR
 
@@ -12,24 +13,14 @@ apt-get install -y -qq /tmp/tampon.deb curl jq poppler-utils > /dev/null 2>&1
 
 echo "— démarrage de tampon"
 TAMPON_SANS_NAVIGATEUR=1 tampon > /tmp/tampon.log 2>&1 &
-for _ in $(seq 1 30); do
-  curl -sf "$BASE_URL" > /dev/null 2>&1 && break
-  sleep 0.5
-done
-curl -sf "$BASE_URL" > /dev/null
+SERVEUR_PID=$!
+attendre_url 30 0.5
 echo "✓ UI servie"
-
-composer() { # $1 titre, $2 gabarit, $3 fichier markdown → nom du tirage
-  jq -n --rawfile md "$3" --arg g "$2" --arg t "$1" \
-    '{markdown: $md, gabarit: $g, meta: {titre: $t, date: "Juin 2026"}}' \
-    | curl -sf -X POST "$BASE_URL/composer" -H "Content-Type: application/json" -d @- \
-    | jq -re .tirage
-}
 
 EXEMPLES=/usr/lib/tampon/share/examples
 for essai in "Rapport test:rapport:$EXEMPLES/rapport.md" "Test AP:ap:$EXEMPLES/ap-test.md"; do
   IFS=: read -r titre gabarit fichier <<< "$essai"
-  tirage=$(composer "$titre" "$gabarit" "$fichier")
+  tirage=$(composer "$titre" "$gabarit" "$fichier" | jq -re .tirage)
   pages=$(pdfinfo "$HOME/Documents/Tampon/$tirage" | awk '/^Pages:/{print $2}')
   [ "$pages" -ge 1 ]
   echo "✓ Composition $gabarit → $tirage ($pages pages)"
@@ -38,3 +29,14 @@ done
 curl -s -X POST "$BASE_URL/composer" -H "Content-Type: application/json" \
   -d '{"markdown": "", "gabarit": "rapport"}' | grep -q erreur
 echo "✓ Rejet contenu vide"
+
+echo "— désinstallation"
+kill "$SERVEUR_PID" 2>/dev/null || true
+wait "$SERVEUR_PID" 2>/dev/null || true
+apt-get purge -y -qq tampon > /dev/null
+hash -r
+! command -v tampon > /dev/null 2>&1
+[ ! -e /usr/bin/tampon ]
+[ ! -e /usr/lib/tampon ]
+! dpkg -s tampon > /dev/null 2>&1
+echo "✓ Désinstallation propre — aucun résidu sous /usr"

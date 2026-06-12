@@ -13,6 +13,7 @@ for IMAGE in debian:bookworm ubuntu:24.04; do
   docker run --rm \
     -v "$PWD/$DEB":/tmp/tampon.deb:ro \
     -v "$PWD/scripts/tester-deb-interne.sh":/tmp/test.sh:ro \
+    -v "$PWD/scripts/lib-test.sh":/tmp/lib-test.sh:ro \
     "$IMAGE" \
     bash /tmp/test.sh
 done

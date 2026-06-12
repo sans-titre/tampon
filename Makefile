@@ -1,4 +1,4 @@
-.PHONY: build up down dev doc test debug paquet test-deb
+.PHONY: build up down dev doc test debug paquet test-deb essai-deb
 
 build:
 	docker compose -f docker/docker-compose.yml build
@@ -39,13 +39,9 @@ TITRE   ?= Test
 DATE    ?= Mai 2026
 
 debug: up
-	@echo "Attente du démarrage..."
-	@sleep 4
 	@echo "--- Composition : gabarit=$(GABARIT) md=$(MD) ---"
-	@jq -n --rawfile md $(MD) \
-		'{"markdown": $$md, "gabarit": "$(GABARIT)", "meta": {"titre": "$(TITRE)", "date": "$(DATE)"}}' \
-		| curl -s -X POST http://localhost:3000/sans-titre.art/tampon/composer \
-		-H "Content-Type: application/json" -d @- ; echo ""
+	@bash -c 'source scripts/lib-test.sh && attendre_url \
+		&& composer "$(TITRE)" "$(GABARIT)" "$(MD)" "$(DATE)"' ; echo ""
 	@echo "--- Logs conteneur ---"
 	@docker compose -f docker/docker-compose.yml logs --no-log-prefix atelier
 	$(MAKE) down
