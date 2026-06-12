@@ -1,4 +1,4 @@
-.PHONY: build up down dev doc test debug paquet test-deb essai-deb lint format
+.PHONY: build up down dev doc test debug paquet test-deb essai-deb chrono-deb lint format
 
 build:
 	docker compose -f docker/docker-compose.yml build
@@ -28,6 +28,11 @@ test-deb:
 # le navigateur hôte, tirages dans ./tirages/ (IMAGE=debian:bookworm, PORT=…)
 essai-deb:
 	bash scripts/essayer-deb.sh
+
+# Chronomètre le cycle utilisateur du .deb (démarrage → export → arrêt) —
+# sortie Markdown, reprise dans le résumé de chaque run CI.
+chrono-deb:
+	@bash scripts/chronometrer-deb.sh
 
 # Échoue réellement (code de sortie propagé) — utilisable comme barrière CI.
 test: up

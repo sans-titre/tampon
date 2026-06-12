@@ -41,6 +41,9 @@ jobs:
       - name: make test-deb
         run: make test-deb
 
+      - name: Chronométrage → résumé du run
+        run: make chrono-deb | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Sommes de contrôle
         run: cd dist && sha256sum tampon_*_amd64.deb > SHA256SUMS
 

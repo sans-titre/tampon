@@ -52,6 +52,9 @@ jobs:
       - name: make test-deb
         run: make test-deb
 
+      - name: Chronométrage → résumé du run
+        run: make chrono-deb | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Artefact .deb (téléchargeable depuis le run)
         uses: actions/upload-artifact@v7
         with:
