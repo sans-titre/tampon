@@ -9,7 +9,7 @@ Générateur de PDFs typographiques à partir de Markdown. On colle du texte, on
 Télécharger le `.deb` de la [dernière release](https://github.com/sans-titre/tampon/releases), puis :
 
 ```bash
-sudo apt install ./tampon_0.3.0~alpha.1_amd64.deb
+sudo apt install ./tampon_0.3.0~alpha.2_amd64.deb
 tampon
 ```
 
