@@ -3,11 +3,11 @@ flowchart LR
     formulaire
     MD + meta + gabarit`"])
 
-    subgraph DOCKER["Image Docker · oven/bun:1-debian"]
+    subgraph BUNDLE["tampon · .deb autonome (ou image Docker en dev)"]
 
         SRV["`**server.ts**
-        HTTP · routing
-        fichiers statiques`"]
+        HTTP · port libre dès 3000
+        fichiers statiques · /imprimer/&lt;jeton&gt;`"]
 
         subgraph SRC["src/"]
             direction TB
@@ -15,34 +15,38 @@ flowchart LR
             MD → HTML · *pure*
             marked + running elements`"]
             C["`**composer.ts**
-            orchestration`"]
+            orchestration
+            page d'impression en mémoire`"]
+            I["`**imprimante.ts**
+            client CDP natif
+            WebSocket · printToPDF`"]
             C --> R
+            C --> I
         end
 
-        PAGEDJS["`**pagedjs-cli**
-        subprocess
-        HTML → PDF`"]
+        CHROM["`**chrome-headless-shell**
+        embarqué · épinglé
+        via CHROMIUM_PATH`"]
 
-        CHROM["`**/usr/bin/chromium**
-        via PUPPETEER_EXECUTABLE_PATH`"]
-
-        subgraph ASSETS["gabarits/ · ui/vendor/"]
+        subgraph ASSETS["share/ · gabarits/ · ui/vendor/"]
             CSS["`**gabarit-*.css**
-            habillage · caracteres`"]
-            POLYFILL["`**paged.polyfill.js**`"]
+            habillage · caracteres · fonts`"]
+            POLYFILL["`**paged.polyfill.js**
+            PagedConfig.after → __tamponRendu`"]
         end
 
     end
 
-    TIRAGES[("**tirages/**
-    volume monté")]
+    TIRAGES[("**~/Documents/Tampon**
+    (ou volume Docker)")]
 
-    USER      -->|"POST /composer"| SRV
-    SRV       --> C
-    C         -->|"document.html"| PAGEDJS
-    PAGEDJS   --> CHROM
-    CHROM     -->|"tirage.pdf"| TIRAGES
-    TIRAGES   --> SRV
-    SRV       -->|"PDF"| USER
+    USER    -->|"POST /composer"| SRV
+    SRV     --> C
+    I       -->|"spawn + CDP ws://"| CHROM
+    CHROM   -->|"GET /imprimer/&lt;jeton&gt;"| SRV
+    SRV     -.->|"HTML + CSS + polyfill"| CHROM
+    I       -->|"tirage.pdf"| TIRAGES
+    TIRAGES --> SRV
+    SRV     -->|"PDF"| USER
 
-    R         -.-> CSS & POLYFILL
+    R -.-> CSS & POLYFILL
