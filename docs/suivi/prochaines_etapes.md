@@ -1,51 +1,30 @@
-# Prochaines étapes — vers un binaire distribuable
+# Prochaines étapes
 
-## Constat actuel
+## Acquis
 
-L'architecture Docker actuelle est solide pour un usage serveur, mais ne permet pas de distribuer une application standalone. La contrainte principale : **Paged.js nécessite un moteur browser** (Chromium headless via pagedjs-cli). Bundler Chromium dans un binaire est techniquement possible mais lourd (~150Mo) et fragile selon les distributions.
+L'expédition Linux est livrée : `make paquet` produit un `.deb` autonome
+(binaire Bun compilé + chrome-headless-shell embarqué + client CDP natif),
+validé sur Debian bookworm et Ubuntu 24.04. Voir
+[expedition-deb.md](expedition-deb.md). La piste Electron explorée ici
+auparavant est définitivement close (sandbox GUI + 330 Mo —
+autopsie sur la branche `explore/electron-desktop`).
 
-## Objectif
+## Fonctionnalités (voir aussi idees_fonctionnalites_tampon.md)
 
-Une application desktop distribuable (`.deb`, `.AppImage`, `.dmg`) avec interface graphique, sans prérequis système pour l'utilisateur.
+1. **Mode lot** — sélectionner plusieurs `.md` et composer tous les tirages
+   d'un coup (le serveur et `composer()` s'y prêtent déjà).
+2. **Gestion des manuscrits** — conserver les `.md` sources et régénérer
+   les PDFs après retouche d'un gabarit.
+3. **Frontmatter complet** — lire `gabarit/titre/date/auteur` directement
+   depuis le document collé (le formulaire ne ferait que pré-remplir).
 
-## Chemin recommandé : Electron
+## Distribution
 
-Electron embarque Chromium nativement. C'est le véhicule standard pour ce cas d'usage.
-
-**Avantages dans notre contexte :**
-- Paged.js tourne directement dans la fenêtre Electron — plus besoin de pagedjs-cli subprocess
-- `renderer.ts` (fonction pure `(markdown, gabarit, meta) → HTML`) branche sans modification
-- Interface graphique dans la même stack (HTML/CSS/JS)
-- Distribution via `electron-builder` : `.deb`, `.AppImage` (Linux), `.dmg` (Mac), `.exe` (Windows)
-
-**Architecture cible :**
-
-```
-Main process (Node/Bun)          Renderer process (Chromium)
-─────────────────────────        ──────────────────────────────
-renderer.ts (MD → HTML)    →     Paged.js (pagination CSS)
-composer-electron.ts       ←     window.PagedPolyfill.preview()
-  └─ page.pdf() via IPC          Interface utilisateur
-```
-
-**Ce qui change :**
-- `composer.ts` : remplacer l'appel subprocess `pagedjs-cli` par IPC Electron + `page.pdf()`
-- `server.ts` : remplacé par le main process Electron
-- Docker : optionnel (mode serveur conservé pour usage CI/API)
-
-**Ce qui ne change pas :**
-- `renderer.ts` — aucune modification
-- `gabarits/` CSS — aucune modification
-- `gabarits/fonts/` — aucune modification
-
-## Étapes
-
-1. Prototype Electron minimal — charger `rendrePage()` dans une `BrowserWindow`, vérifier le rendu Paged.js
-2. Export PDF via `contents.printToPDF()` (API Electron native, pas besoin de puppeteer)
-3. Interface utilisateur (éditeur Markdown + sélecteur de gabarit + bouton Composer)
-4. Packaging avec `electron-builder`
-
-## Référence
-
-- [Electron — printToPDF](https://www.electronjs.org/docs/latest/api/web-contents#contentsprinttopdfoptionsoptions)
-- [electron-builder](https://www.electron.build/)
+- **Tarball portable** (`.tar.gz` du même payload) pour Fedora/Arch —
+  quasi gratuit : l'arborescence `usr/lib/tampon` se réutilise telle quelle.
+- **Mise à jour du moteur** : ré-épingler `CHS_VERSION` dans
+  `scripts/construire-deb-interne.sh` à chaque release et relancer
+  `make test-deb`.
+- **Long terme — Tauri** : toujours l'état de l'art documenté
+  (`explore/pagedjs-tauri`, bundle < 10 Mo, WebView système) ; à réévaluer
+  si le multi-plateforme (macOS/Windows) devient une vraie demande.
