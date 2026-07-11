@@ -7,12 +7,18 @@ RUN apt-get update && apt-get install -y \
   --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+# Pipeline CDP : le serveur pilote directement le Chromium de l'image.
+ENV CHROMIUM_PATH=/usr/bin/chromium
+ENV TAMPON_RACINE=/app
+ENV TIRAGES_DIR=/app/tirages
+ENV LOGS_DIR=/app/logs
+ENV TAMPON_SANS_NAVIGATEUR=1
+ENV PORT=3000
+# Le serveur écoute en boucle locale par défaut ; en conteneur, le mapping
+# de port exige toutes les interfaces.
+ENV TAMPON_HOTE=0.0.0.0
 
 WORKDIR /app
-
-RUN bun add -g pagedjs-cli
 
 COPY package.json bun.lock* ./
 RUN bun install
