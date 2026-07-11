@@ -12,6 +12,27 @@ function afficherStatut(message, type = "neutre") {
   zoneStatut.innerHTML = message;
 }
 
+// Le select reflète les gabarit-*.css réellement présents sur le serveur.
+async function chargerGabarits() {
+  try {
+    const reponse = await fetch("/sans-titre.art/tampon/gabarits");
+    const gabarits = await reponse.json();
+    selectGabarit.innerHTML = "";
+    for (const gabarit of gabarits) {
+      const option = document.createElement("option");
+      option.value = gabarit;
+      option.textContent =
+        gabarit.length <= 2 ? gabarit.toUpperCase() : gabarit[0].toUpperCase() + gabarit.slice(1);
+      selectGabarit.append(option);
+    }
+    if (gabarits.includes("rapport")) selectGabarit.value = "rapport";
+  } catch {
+    afficherStatut("Impossible de charger la liste des gabarits.", "erreur");
+  }
+}
+
+chargerGabarits();
+
 btnComposer.addEventListener("click", async () => {
   const markdown = manuscrit.value.trim();
   if (!markdown) {
