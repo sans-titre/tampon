@@ -1,0 +1,147 @@
+# Release — déclenchée par un tag v* (ex. v0.3.0-alpha.2).
+#
+# Pipeline en quatre étapes distinctes et chaînées, pour un graphe lisible
+# dans l'onglet Actions et un débogage ciblé (chaque opération échoue seule) :
+#
+#   vérifier ─▶ construire ─▶ valider ─▶ publier
+#
+# Le paquet construit transite de job en job via un artifact (chaque job
+# tourne sur un runner neuf). Seul « publier » reçoit les droits d'écriture.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+env:
+  ARTIFACT: paquet-deb
+
+jobs:
+  # 1 — Garde-fou : le tag doit correspondre à la version du manifeste.
+  verifier:
+    name: Vérifier la cohérence tag ↔ version
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: tag ↔ package.json
+        run: |
+          VERSION=$(jq -r .version package.json)
+          if [ "v${VERSION}" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error::tag ${GITHUB_REF_NAME} ≠ package.json v${VERSION}"
+            exit 1
+          fi
+          echo "tag ${GITHUB_REF_NAME} = package.json v${VERSION} ✓"
+
+  # 2 — Construire le .deb autonome et le publier comme artifact.
+  construire:
+    name: Construire le paquet
+    needs: verifier
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Cache chrome-headless-shell (version épinglée)
+        uses: actions/cache@v5
+        with:
+          path: dist/cache
+          key: chs-${{ hashFiles('scripts/chs-version') }}
+
+      - name: make paquet
+        run: make paquet
+
+      - name: Téléverser le paquet
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: dist/tampon_*_amd64.deb
+          if-no-files-found: error
+
+  # 3 — Installer sur distributions vierges, composer, désinstaller, puis
+  #     chronométrer le cycle utilisateur (résumé du run).
+  valider:
+    name: Valider sur distributions vierges
+    needs: construire
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Récupérer le paquet
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: dist
+
+      - name: make test-deb
+        run: make test-deb
+
+      - name: Chronométrage → résumé du run
+        run: make chrono-deb | tee -a "$GITHUB_STEP_SUMMARY"
+
+  # 4 — Sommes de contrôle, attestation de provenance, publication GitHub.
+  publier:
+    name: Publier la release
+    needs: valider
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Récupérer le paquet
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: dist
+
+      - name: Sommes de contrôle
+        run: cd dist && sha256sum tampon_*_amd64.deb > SHA256SUMS
+
+      - name: Attestation de provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: dist/tampon_*_amd64.deb
+
+      - name: Publier la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            *-*) PRERELEASE="--prerelease" ;;
+            *)   PRERELEASE="" ;;
+          esac
+          DEB=$(basename dist/tampon_*_amd64.deb)
+          {
+            echo "## Installation (Debian / Ubuntu, amd64)"
+            echo
+            echo '```bash'
+            echo "sudo apt install ./${DEB}"
+            echo "tampon"
+            echo '```'
+            echo
+            echo "Tampon apparaît aussi dans le menu d'applications du bureau."
+            echo "Paquet **autonome** : serveur et moteur de rendu embarqués, aucun prérequis."
+            echo "Les PDFs sont enregistrés dans \`~/Documents/Tampon/\`."
+            echo
+            echo "Validé automatiquement sur \`debian:bookworm\` et \`ubuntu:24.04\` vierges."
+            echo "Intégrité : \`sha256sum -c SHA256SUMS\` · provenance : onglet *Attestations* du dépôt."
+            echo
+          } > notes-release.md
+          gh release create "${GITHUB_REF_NAME}" \
+            dist/tampon_*_amd64.deb \
+            dist/SHA256SUMS \
+            --title "tampon ${GITHUB_REF_NAME}" \
+            --notes-file notes-release.md \
+            --generate-notes \
+            ${PRERELEASE}
