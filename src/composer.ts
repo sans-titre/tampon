@@ -1,10 +1,18 @@
-import { $ } from "bun";
-import { mkdirSync, writeFileSync } from "fs";
+import { randomUUID } from "crypto";
+import { mkdirSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
+import { BASE, TIRAGES_DIR } from "./config";
+import { imprimer } from "./imprimante";
 import { journal } from "./journal";
 import { rendrePage } from "./renderer";
 
-const TIRAGES_DIR = process.env.TIRAGES_DIR ?? "/app/tirages";
+// Pages d'impression servies sur GET {BASE}/imprimer/{jeton} le temps que
+// Chromium les charge ; purgées au finally de composer(), succès ou échec.
+const pagesEnAttente = new Map<string, string>();
+
+export function obtenirPageImpression(jeton: string): string | undefined {
+  return pagesEnAttente.get(jeton);
+}
 
 function slugifier(texte: string): string {
   return texte
@@ -16,10 +24,26 @@ function slugifier(texte: string): string {
     .slice(0, 80);
 }
 
-function nomFichierTirage(nomFichier: string | null, meta: Record<string, string>): string {
-  if (nomFichier) return slugifier(nomFichier) + ".pdf";
-  if (meta.titre) return slugifier(meta.titre) + ".pdf";
-  return `tirage-${Date.now()}.pdf`;
+function nomBaseTirage(nomFichier: string | null, meta: Record<string, string>): string {
+  const slug = slugifier(nomFichier ?? meta.titre ?? "");
+  // Titre entièrement non latin (cyrillique, CJK…) → slug vide :
+  // repli horodaté plutôt qu'un fichier caché « .pdf ».
+  return slug || `tirage-${Date.now()}`;
+}
+
+// Réserve un nom libre par création atomique (flag wx) : deux compositions
+// au même titre ne s'écrasent jamais — la seconde devient « -2 », etc.
+function reserverTirage(nomBase: string): { nom: string; chemin: string } {
+  for (let n = 1; ; n++) {
+    const nom = n === 1 ? `${nomBase}.pdf` : `${nomBase}-${n}.pdf`;
+    const chemin = join(TIRAGES_DIR, nom);
+    try {
+      writeFileSync(chemin, "", { flag: "wx" });
+      return { nom, chemin };
+    } catch {
+      // existe déjà — on tente le suffixe suivant
+    }
+  }
 }
 
 export async function composer(
@@ -27,29 +51,26 @@ export async function composer(
   gabarit: string,
   meta: Record<string, string> = {},
   nomFichier: string | null = null,
+  port: number,
 ): Promise<string> {
-  const horodatage = Date.now();
-  const tmpDir = `/tmp/atelier-${horodatage}`;
-  mkdirSync(tmpDir, { recursive: true });
   mkdirSync(TIRAGES_DIR, { recursive: true });
 
-  const html = rendrePage(markdown, gabarit, meta);
-  const htmlPath = join(tmpDir, "document.html");
-  writeFileSync(htmlPath, html, "utf-8");
+  const { nom: nomTirage, chemin: tiragePath } = reserverTirage(nomBaseTirage(nomFichier, meta));
 
-  const nomTirage = nomFichierTirage(nomFichier, meta);
-  const tiragePath = join(TIRAGES_DIR, nomTirage);
+  const jeton = randomUUID();
+  pagesEnAttente.set(jeton, rendrePage(markdown, gabarit, meta));
+  const urlImpression = `http://127.0.0.1:${port}${BASE}/imprimer/${jeton}`;
 
   try {
-    journal.info(`pagedjs-cli → ${nomTirage}`);
-    await $`pagedjs-cli ${htmlPath} -o ${tiragePath} --browserArgs --no-sandbox,--disable-dev-shm-usage`.quiet();
-  } catch (err: any) {
-    const stderr = (err.stderr?.toString() ?? String(err)).trim();
-    journal.erreur("pagedjs-cli —", stderr);
-    throw new Error(stderr || "Échec de la composition");
+    journal.info(`Impression → ${nomTirage}`);
+    await imprimer(urlImpression, tiragePath);
+  } catch (err) {
+    // Ne pas laisser traîner le fichier vide de réservation.
+    rmSync(tiragePath, { force: true });
+    throw err;
+  } finally {
+    pagesEnAttente.delete(jeton);
   }
-
-  await $`rm -rf ${tmpDir}`.quiet();
 
   return nomTirage;
 }
