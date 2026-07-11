@@ -1,0 +1,67 @@
+flowchart LR
+    BIN["`**tampon**
+    binaire Bun —
+    démarre le serveur,
+    ouvre le navigateur`"]
+
+    subgraph srv [Bun — serveur HTTP local]
+        SRV["`**server.ts**
+        route les requêtes`"]
+        REND["`**renderer.ts**
+        Markdown → HTML :
+        injecte running elements,
+        assemble la page`"]
+        MARKED["`**marked**
+        parse le Markdown`"]
+    end
+
+    subgraph gen [Génération PDF]
+        PCLI["`**pagedjs-cli**
+        HTML → PDF
+        via Paged.js`"]
+        CHROM["`**Chromium système**
+        /usr/bin/chromium
+        Depends: dans le .deb`"]
+    end
+
+    subgraph css [CSS — embarqués dans le .deb]
+        C["`**caracteres.css**
+        tokens typo +
+        @font-face Atkinson`"]
+        H["`**habillage.css**
+        running elements,
+        tables, listes`"]
+        G["`**gabarit-*.css**
+        @page, marges,
+        hiérarchie`"]
+        F["`**fonts/**
+        Atkinson Hyperlegible`"]
+    end
+
+    UI["`**Navigateur**
+    formulaire :
+    markdown, gabarit,
+    titre, date, auteur`"]
+
+    TIRAGES[("`**~/Documents/Tampon/**
+    dossier de sortie`")]
+
+    BIN -->|spawn| SRV
+    BIN -->|xdg-open / chromium| UI
+    UI -->|"`POST /composer
+    markdown + meta + gabarit`"| SRV
+    SRV --> REND
+    REND --> MARKED
+    F --> C
+    C & H --> G
+    G -->|"`<link> dans le HTML`"| PCLI
+    REND -->|document.html| PCLI
+    PCLI --> CHROM
+    CHROM --> TIRAGES
+    TIRAGES -->|stream PDF| SRV
+    SRV -->|PDF| UI
+
+    style BIN    fill:#c0392b,color:#fff,stroke:#922b21
+    style UI     fill:#c0392b,color:#fff,stroke:#922b21
+    style CHROM  fill:#c0392b,color:#fff,stroke:#922b21
+    style TIRAGES fill:#c0392b,color:#fff,stroke:#922b21
