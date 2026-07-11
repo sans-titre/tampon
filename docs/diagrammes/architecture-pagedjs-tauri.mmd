@@ -1,0 +1,67 @@
+flowchart LR
+    subgraph tauri [" "]
+        MAIN["`**Tauri Main**
+        binaire Rust natif,
+        orchestre l'app,
+        gère le cycle de vie`"]
+
+        subgraph win [Fenêtre Tauri]
+            UI["`**UI HTML/JS vanilla**
+            saisie markdown + meta`"]
+            PAGEDJS["`**Paged.js**
+            renderer CSS Paged Media
+            JS pur dans la WebView —
+            pagine, running elements,
+            numérotation`"]
+            WEBVIEW["`**WebView système**
+            WebKit / WebView2 /
+            WebKitGTK selon l'OS —
+            remplace Chromium headless`"]
+        end
+
+        subgraph pipeline [Pipeline]
+            COMP["`**composer.ts**
+            convertit Markdown → HTML,
+            préfixe les running elements`"]
+            subgraph css [CSS]
+                C["`**caracteres.css**
+                tokens typo : fontes,
+                corps, couleurs, marges`"]
+                H["`**habillage.css**
+                éléments réutilisables :
+                bandeau, pied de page,
+                tables, listes`"]
+                G["`**gabarit-*.css**
+                mise en page par format :
+                @page, marges, hiérarchie
+                des titres`"]
+            end
+        end
+    end
+
+    FONTS[("`**fonts/**
+    embarquées dans
+    le bundle Tauri`")]
+
+    TIRAGES[("`**~/Documents/Tampon/**
+    dossier de sortie
+    dans le home utilisateur`")]
+
+    MAIN -->|IPC| COMP
+    MAIN -->|ouvre| win
+    UI -->|"`markdown + meta
+    + gabarit`"| COMP
+    COMP -->|HTML + classes running| PAGEDJS
+    C & H --> G --> PAGEDJS
+    PAGEDJS --> WEBVIEW
+    FONTS --> WEBVIEW
+    WEBVIEW -->|print-to-PDF| TIRAGES
+    TIRAGES -->|stream PDF| UI
+
+    style MAIN    fill:#c0392b,color:#fff,stroke:#922b21
+    style PAGEDJS fill:#c0392b,color:#fff,stroke:#922b21
+    style WEBVIEW fill:#c0392b,color:#fff,stroke:#922b21
+    style FONTS   fill:#c0392b,color:#fff,stroke:#922b21
+    style TIRAGES fill:#c0392b,color:#fff,stroke:#922b21
+    style win     fill:#fef9e7,stroke:#aaa
+    style tauri   fill:#f0f0f0,stroke:#c0392b,stroke-width:2px
