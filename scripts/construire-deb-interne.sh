@@ -56,6 +56,7 @@ chmod 755 "$LIB/bin/tampon" "$LIB/chrome-headless-shell/chrome-headless-shell"
 cat > "$DEB/usr/bin/tampon" <<'EOF'
 #!/bin/sh
 export TAMPON_RACINE=/usr/lib/tampon/share
+export TAMPON_ESPACE_UTILISATEUR=1
 export CHROMIUM_PATH=/usr/lib/tampon/chrome-headless-shell/chrome-headless-shell
 exec /usr/lib/tampon/bin/tampon "$@"
 EOF
