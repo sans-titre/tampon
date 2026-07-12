@@ -13,7 +13,7 @@ sudo apt install ./tampon_0.3.0~alpha.3_amd64.deb
 tampon
 ```
 
-Le navigateur s'ouvre sur l'atelier. Les PDFs sont enregistrés dans `~/Documents/Tampon/`.
+Le navigateur s'ouvre sur l'atelier. Les PDFs sont enregistrés dans `~/Documents/Tampon/`, où l'on trouve aussi les gabarits et exemples fournis (`gabarits/`, `examples/`), copiés éditables au premier lancement — les personnaliser modifie directement le rendu. La désinstallation ne touche pas à ce dossier (données utilisateur).
 
 Tampon apparaît aussi dans le menu d'applications du bureau ; relancer alors qu'une instance tourne déjà rouvre simplement l'atelier en cours.
 

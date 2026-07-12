@@ -1,6 +1,7 @@
 import { file, serve } from "bun";
 import { existsSync, readdirSync } from "fs";
 import { join } from "path";
+import { amorcerEspaceUtilisateur } from "./src/amorcage";
 import { composer, obtenirPageImpression } from "./src/composer";
 import { BASE, GABARITS_DIR, TIRAGES_DIR, UI_DIR } from "./src/config";
 import { journal } from "./src/journal";
@@ -172,6 +173,10 @@ if (!process.env.PORT && !process.env.TAMPON_SANS_NAVIGATEUR) {
     process.exit(0);
   }
 }
+
+// Expose les gabarits/exemples fournis, éditables, dans ~/Documents/Tampon
+// (contexte .deb uniquement) — avant que le serveur ne les liste et les serve.
+amorcerEspaceUtilisateur();
 
 const serveur = demarrer();
 const adresse = `http://localhost:${serveur.port}${BASE}`;
