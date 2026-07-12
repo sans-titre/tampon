@@ -9,11 +9,25 @@ set -euo pipefail
 CHS_VERSION=$(cat "$(dirname "$0")/chs-version")
 CHS_URL="https://storage.googleapis.com/chrome-for-testing-public/${CHS_VERSION}/linux64/chrome-headless-shell-linux64.zip"
 
-VERSION=$(bun -e 'console.log(require("./package.json").version)')
-# Pré-release npm (0.3.0-alpha.1) → champ Version Debian (0.3.0~alpha.1) :
-# le tilde trie AVANT la version finale, sémantique apt correcte. Le nom de
-# FICHIER garde le tiret (GitHub remplacerait le tilde dans les assets).
-DEB_VERSION=$(printf '%s' "$VERSION" | tr '-' '~')
+# Version dérivée du tag Git (source de vérité unique) : un .deb dit lui-même
+# ce qu'il est, sans bump manuel de manifeste. Sur un commit taggé, git
+# describe donne « v0.3.0-alpha.3 » ; sur un commit ultérieur,
+# « v0.3.0-alpha.3-5-gabc1234 » (5 commits après le tag + hash court).
+DESCRIBE=$(git describe --tags)
+VERSION=${DESCRIBE#v}
+
+# Champ Version Debian. Pré-release npm (0.3.0-alpha.3) → 0.3.0~alpha.3 : le
+# tilde trie AVANT la version finale (sémantique apt correcte). Un build
+# intermédiaire (…-5-gabc1234) devient 0.3.0~alpha.3+5.gabc1234 : le « + »
+# trie APRÈS le tag, donc plus récent que la pré-release officielle, et
+# distingue nettement release exacte vs build de développement.
+# Le nom de FICHIER garde la forme à tirets (GitHub remplace ~ et + dans les
+# noms d'assets).
+if [[ "$VERSION" =~ ^(.+)-([0-9]+)-(g[0-9a-f]+)$ ]]; then
+  DEB_VERSION="$(printf '%s' "${BASH_REMATCH[1]}" | tr '-' '~')+${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
+else
+  DEB_VERSION="$(printf '%s' "$VERSION" | tr '-' '~')"
+fi
 echo "— tampon ${DEB_VERSION} / chrome-headless-shell ${CHS_VERSION}"
 
 echo "— compilation du binaire"

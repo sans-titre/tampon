@@ -23,16 +23,16 @@ Pour construire le paquet : `make paquet` (→ `dist/`), puis `make test-deb` po
 
 ## Publier une release
 
-Le CI (GitHub Actions) rejoue `make lint`, `make test`, `make paquet` et `make test-deb` (installation, composition **et désinstallation propre** sur distributions vierges) à chaque push. Pour publier :
+Le CI (GitHub Actions) rejoue `make lint`, `make test`, `make paquet` et `make test-deb` (installation, composition **et désinstallation propre** sur distributions vierges) à chaque push. La version du paquet est dérivée du tag Git (`git describe`) : **le tag est l'unique source de vérité**, aucune version à saisir à la main. Pour publier, il suffit de taguer et pousser :
 
 ```bash
-# 1. aligner la version (pré-release : suffixe -alpha.N / -beta.N)
-#    package.json : "version": "0.3.0-alpha.2"
-# 2. taguer et pousser
-git tag v0.3.0-alpha.2 && git push origin v0.3.0-alpha.2
+# pré-release : suffixe -alpha.N / -beta.N (publiée en pré-release GitHub)
+git tag v0.3.0-alpha.4 && git push origin v0.3.0-alpha.4
 ```
 
 Le workflow `release.yml` reconstruit le paquet, le revalide sur distributions vierges, et publie la release GitHub (pré-release si le tag contient un tiret) avec le `.deb`, les sommes SHA-256 et une attestation de provenance.
+
+Un `.deb` construit hors tag (`make paquet` en cours de développement) porte une version du type `0.3.0~alpha.4+5.gabc1234` : *5 commits après le tag `v0.3.0-alpha.4`*, hash court à l'appui. Il se distingue ainsi au premier coup d'œil d'une release officielle, qui correspond exactement à un tag.
 
 ## Lancer en développement
 

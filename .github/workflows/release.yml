@@ -3,7 +3,10 @@
 # Pipeline en quatre étapes distinctes et chaînées, pour un graphe lisible
 # dans l'onglet Actions et un débogage ciblé (chaque opération échoue seule) :
 #
-#   vérifier ─▶ construire ─▶ valider ─▶ publier
+#   construire ─▶ valider ─▶ publier
+#
+# La version du .deb est dérivée du tag via git describe (source de vérité
+# unique) : aucune garde de cohérence tag ↔ manifeste n'est nécessaire.
 #
 # Le paquet construit transite de job en job via un artifact (chaque job
 # tourne sur un runner neuf). Seul « publier » reçoit les droits d'écriture.
@@ -17,34 +20,17 @@ env:
   ARTIFACT: paquet-deb
 
 jobs:
-  # 1 — Garde-fou : le tag doit correspondre à la version du manifeste.
-  verifier:
-    name: Vérifier la cohérence tag ↔ version
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v6
-      - name: tag ↔ package.json
-        run: |
-          VERSION=$(jq -r .version package.json)
-          if [ "v${VERSION}" != "${GITHUB_REF_NAME}" ]; then
-            echo "::error::tag ${GITHUB_REF_NAME} ≠ package.json v${VERSION}"
-            exit 1
-          fi
-          echo "tag ${GITHUB_REF_NAME} = package.json v${VERSION} ✓"
-
-  # 2 — Construire le .deb autonome et le publier comme artifact.
+  # 1 — Construire le .deb autonome et le publier comme artifact.
   construire:
     name: Construire le paquet
-    needs: verifier
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # tags nécessaires à git describe (version du .deb)
 
       - name: Cache chrome-headless-shell (version épinglée)
         uses: actions/cache@v5
@@ -62,7 +48,7 @@ jobs:
           path: dist/tampon_*_amd64.deb
           if-no-files-found: error
 
-  # 3 — Installer sur distributions vierges, composer, désinstaller, puis
+  # 2 — Installer sur distributions vierges, composer, désinstaller, puis
   #     chronométrer le cycle utilisateur (résumé du run).
   valider:
     name: Valider sur distributions vierges
@@ -86,7 +72,7 @@ jobs:
       - name: Chronométrage → résumé du run
         run: make chrono-deb | tee -a "$GITHUB_STEP_SUMMARY"
 
-  # 4 — Sommes de contrôle, attestation de provenance, publication GitHub.
+  # 3 — Sommes de contrôle, attestation de provenance, publication GitHub.
   publier:
     name: Publier la release
     needs: valider
