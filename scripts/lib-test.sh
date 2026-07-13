@@ -14,8 +14,8 @@ attendre_url() { # $1 essais (déf. 30), $2 pause en s (déf. 1)
   curl -sf "$BASE_URL" > /dev/null
 }
 
-composer() { # $1 titre, $2 gabarit, $3 fichier markdown, $4 date (opt.) → JSON de la réponse
-  jq -n --rawfile md "$3" --arg g "$2" --arg t "$1" --arg d "${4:-Juin 2026}" \
-    '{markdown: $md, gabarit: $g, meta: {titre: $t, date: $d}}' \
+composer() { # $1 titre, $2 gabarit, $3 fichier markdown, $4 date (opt.), $5 auteur (opt.) → JSON
+  jq -n --rawfile md "$3" --arg g "$2" --arg t "$1" --arg d "${4:-Juin 2026}" --arg a "${5:-}" \
+    '{markdown: $md, gabarit: $g, meta: {titre: $t, date: $d, auteur: $a}}' \
     | curl -sf -X POST "$BASE_URL/composer" -H "Content-Type: application/json" -d @-
 }

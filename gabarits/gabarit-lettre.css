@@ -29,7 +29,10 @@
   }
 
   @bottom-left {
-    content: element(pied-coordonnees);
+    content: "Association sans-titre — SIRET 000 000 000";
+    font-family: var(--fonte-titre);
+    font-size: var(--corps-pied);
+    color: var(--encre-secondaire);
     vertical-align: top;
     padding-top: 4pt;
   }
@@ -39,6 +42,12 @@
     font-family: var(--fonte-titre);
     font-size: var(--corps-pied);
     color: var(--encre-secondaire);
+    vertical-align: top;
+    padding-top: 4pt;
+  }
+
+  @bottom-right {
+    content: element(pied-auteur);
     vertical-align: top;
     padding-top: 4pt;
   }

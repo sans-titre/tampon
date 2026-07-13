@@ -1,4 +1,4 @@
-.PHONY: build up down dev doc test debug paquet test-deb essai-deb chrono-deb lint format
+.PHONY: build up down dev doc test debug pdf paquet test-deb essai-deb chrono-deb lint format
 
 # Port hôte de l'atelier (défaut 3000). Surchargeable : make up PORT_HOTE=3100
 # Une collision est détectée avant le démarrage (message clair, pas d'erreur
@@ -62,11 +62,21 @@ MD      ?= examples/rapport.md
 GABARIT ?= rapport
 TITRE   ?= Test
 DATE    ?= Mai 2026
+AUTEUR  ?= Marcel Dupont
 
 debug: up
 	@echo "--- Composition : gabarit=$(GABARIT) md=$(MD) ---"
 	@bash -c 'source scripts/lib-test.sh; export BASE_URL="$(ATELIER_URL)"; attendre_url \
-		&& composer "$(TITRE)" "$(GABARIT)" "$(MD)" "$(DATE)"' ; echo ""
+		&& composer "$(TITRE)" "$(GABARIT)" "$(MD)" "$(DATE)" "$(AUTEUR)"' ; echo ""
 	@echo "--- Logs conteneur ---"
 	@docker compose -f docker/docker-compose.yml logs --no-log-prefix atelier
+	$(MAKE) down
+
+# Compose un PDF de contrôle via le vrai pipeline et le laisse dans tirages/.
+# Variables surchargeables : GABARIT, TITRE, DATE, AUTEUR, MD, PORT_HOTE.
+#   make pdf GABARIT=lettre TITRE="Essai" AUTEUR="Prénom Nom"
+pdf: up
+	@bash -c 'source scripts/lib-test.sh; export BASE_URL="$(ATELIER_URL)"; attendre_url \
+		&& rep=$$(composer "$(TITRE)" "$(GABARIT)" "$(MD)" "$(DATE)" "$(AUTEUR)") \
+		&& echo "PDF → tirages/$$(echo "$$rep" | jq -r .tirage)"'
 	$(MAKE) down
