@@ -43,7 +43,7 @@ export function rendrePage(
   <div class="bandeau-nom" aria-hidden="true">sans-titre</div>
   <div class="bandeau-titre-courant" aria-hidden="true">${titre}</div>
   <div class="bandeau-date-courante" aria-hidden="true">${date}</div>
-  <div class="pied-coordonnees" aria-hidden="true">Association sans-titre — SIRET 000 000 000 00000${auteur ? ` — ${auteur}` : ""}</div>
+  <div class="pied-auteur" aria-hidden="true">${auteur}</div>
   ${corps}
 </body>
 </html>`;

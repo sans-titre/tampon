@@ -26,11 +26,12 @@
   text-align: right;
 }
 
-.pied-coordonnees {
-  position: running(pied-coordonnees);
+.pied-auteur {
+  position: running(pied-auteur);
   font-family: var(--fonte-titre);
   font-size: var(--corps-pied);
   color: var(--encre-secondaire);
+  text-align: right;
 }
 
 /* ─── Tables ─────────────────────────────────────────────────────────────── */
