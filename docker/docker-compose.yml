@@ -7,7 +7,7 @@ services:
       context: ..
       dockerfile: docker/atelier/Dockerfile
     ports:
-      - "3000:3000"
+      - "${PORT_HOTE:-3000}:3000"
     volumes:
       - ../tirages:/app/tirages
       - ../logs:/app/logs
