@@ -70,7 +70,7 @@ Le contenu du document commence ici...
 
 | Champ | Rôle |
 |---|---|
-| `gabarit` | `rapport`, `lettre` ou `ap` |
+| `gabarit` | `rapport`, `lettre` etc. |
 | `titre` | Affiché dans le bandeau haut et le nom du PDF |
 | `date` | Affiché dans le bandeau haut |
 | `auteur` | Affiché dans le pied de page |
@@ -81,11 +81,7 @@ Le contenu du document commence ici...
 
 **Lettre** — format épistolaire : premier paragraphe aligné à droite (lieu et date), dernier paragraphe aligné à gauche (formule de politesse).
 
-**Style AP** — grille modulaire (module 5 mm), échelle typographique de raison 1.25, fontes Jost / Inter / InterTight embarquées.
-
 ## Architecture
-
-![Architecture](docs/rendus/architecture.png)
 
 Le pipeline délègue autant que possible à [Paged.js](https://pagedjs.org/) :
 
@@ -94,6 +90,10 @@ Le pipeline délègue autant que possible à [Paged.js](https://pagedjs.org/) :
 - **`imprimante.ts`** pilote `chrome-headless-shell` en **Chrome DevTools Protocol** natif (WebSocket) : chargement de la page d'impression, attente de la fin de pagination Paged.js, `Page.printToPDF`
 
 `composer.ts` orchestre : génère la page d'impression (servie en mémoire sur `/imprimer/<jeton>`), appelle `imprimante.ts`, retourne le nom du PDF produit. Ni puppeteer ni pagedjs-cli : le pipeline tient dans un binaire `bun build --compile`.
+
+Ce pipeline (`src/`) est strictement identique en paquet `.deb` et en développement ; seuls changent la provenance de `chrome-headless-shell` (embarqué dans le binaire vs installé dans l'image Docker) et le dossier où atterrissent les PDFs (`~/Documents/Tampon/` vs volume Docker `tirages/`) :
+
+![Architecture](docs/rendus/architecture.png)
 
 ## Prérequis
 
