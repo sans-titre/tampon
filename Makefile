@@ -18,25 +18,25 @@ doc:
 # Livrable Linux : dist/tampon_<version>_amd64.deb (binaire Bun compilé
 # + chrome-headless-shell embarqué, construit dans oven/bun:1-debian)
 paquet:
-	bash scripts/construire-deb.sh
+	bash scripts/deb/construire-deb.sh
 
 # Installe le .deb dans debian:bookworm et ubuntu:24.04 vierges et compose
 test-deb:
-	bash scripts/tester-deb.sh
+	bash scripts/deb/tester-deb.sh
 
 # Essai interactif : .deb installé dans un conteneur vierge, UI ouverte dans
 # le navigateur hôte, tirages dans ./tirages/ (IMAGE=debian:bookworm, PORT=…)
 essai-deb:
-	bash scripts/essayer-deb.sh
+	bash scripts/deb/essayer-deb.sh
 
 # Chronomètre le cycle utilisateur du .deb (démarrage → export → arrêt) —
 # sortie Markdown, reprise dans le résumé de chaque run CI.
 chrono-deb:
-	@bash scripts/chronometrer-deb.sh
+	@bash scripts/deb/chronometrer-deb.sh
 
 # Échoue réellement (code de sortie propagé) — utilisable comme barrière CI.
 test: up
-	@bash scripts/tester-serveur.sh; etat=$$?; $(MAKE) down; exit $$etat
+	@bash scripts/dev/tester-serveur.sh; etat=$$?; $(MAKE) down; exit $$etat
 
 # Lint + format (biome) dans le conteneur bun — aucune installation locale.
 lint:

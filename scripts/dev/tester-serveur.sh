@@ -2,7 +2,7 @@
 # Assertions contre un serveur tampon déjà lancé (make test, CI).
 # Sort en erreur à la première assertion qui échoue.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 source scripts/lib-test.sh
 
 attendre_url
