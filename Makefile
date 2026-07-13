@@ -1,15 +1,26 @@
 .PHONY: build up down dev doc test debug paquet test-deb essai-deb chrono-deb lint format
 
+# Port hôte de l'atelier (défaut 3000). Surchargeable : make up PORT_HOTE=3100
+# Une collision est détectée avant le démarrage (message clair, pas d'erreur
+# réseau brute de Docker) — voir scripts/dev/verifier-port.sh.
+PORT_HOTE   ?= 3000
+ATELIER_URL := http://localhost:$(PORT_HOTE)/sans-titre.art/tampon
+export PORT_HOTE
+
 build:
 	docker compose -f docker/docker-compose.yml build
 
 up:
+	@bash scripts/dev/verifier-port.sh $(PORT_HOTE)
 	docker compose -f docker/docker-compose.yml up -d
+	@echo "Atelier ouvert → $(ATELIER_URL)"
 
 down:
 	docker compose -f docker/docker-compose.yml down
 
 dev:
+	@bash scripts/dev/verifier-port.sh $(PORT_HOTE)
+	@echo "Atelier ouvert → $(ATELIER_URL)"
 	docker compose -f docker/docker-compose.yml up
 
 doc:
@@ -36,7 +47,7 @@ chrono-deb:
 
 # Échoue réellement (code de sortie propagé) — utilisable comme barrière CI.
 test: up
-	@bash scripts/dev/tester-serveur.sh; etat=$$?; $(MAKE) down; exit $$etat
+	@BASE_URL="$(ATELIER_URL)" bash scripts/dev/tester-serveur.sh; etat=$$?; $(MAKE) down; exit $$etat
 
 # Lint + format (biome) dans le conteneur bun — aucune installation locale.
 lint:
@@ -54,7 +65,7 @@ DATE    ?= Mai 2026
 
 debug: up
 	@echo "--- Composition : gabarit=$(GABARIT) md=$(MD) ---"
-	@bash -c 'source scripts/lib-test.sh && attendre_url \
+	@bash -c 'source scripts/lib-test.sh; export BASE_URL="$(ATELIER_URL)"; attendre_url \
 		&& composer "$(TITRE)" "$(GABARIT)" "$(MD)" "$(DATE)"' ; echo ""
 	@echo "--- Logs conteneur ---"
 	@docker compose -f docker/docker-compose.yml logs --no-log-prefix atelier

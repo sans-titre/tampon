@@ -37,11 +37,14 @@ Un `.deb` construit hors tag (`make paquet` en cours de développement) porte un
 ## Lancer en développement
 
 ```bash
-docker compose up --build   # première fois
-docker compose up           # ensuite
+make up      # démarre l'atelier et affiche son URL
+make down    # l'arrête
 ```
 
-Ouvrir [http://localhost:3000/sans-titre.art/tampon](http://localhost:3000/sans-titre.art/tampon).
+L'atelier est servi sur **http://localhost:3000/sans-titre.art/tampon** (l'URL est
+affichée dans la console). Si le `3000` est déjà pris — typiquement l'appli
+installée qui tourne — `make up` s'arrête avec un message clair ; relance alors
+sur un autre port : `make up PORT_HOTE=3100`.
 
 ## Utilisation
 
