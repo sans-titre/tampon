@@ -34,6 +34,16 @@
   text-align: right;
 }
 
+/* ─── Corps du document ──────────────────────────────────────────────────── */
+
+/* Conteneur du contenu Markdown, émis par renderer.ts pour tous les gabarits.
+   Crochet structurel partagé (comme les bandeaux et le pied ci-dessus) ;
+   transparent à la mise en page — l'espacement vient de ses enfants. Chaque
+   gabarit y accroche ses propres raffinements (cf. gabarit-lettre.css). */
+.corps-document {
+  margin: 0;
+}
+
 /* ─── Tables ─────────────────────────────────────────────────────────────── */
 
 table {
