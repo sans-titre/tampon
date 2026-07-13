@@ -44,7 +44,9 @@ export function rendrePage(
   <div class="bandeau-titre-courant" aria-hidden="true">${titre}</div>
   <div class="bandeau-date-courante" aria-hidden="true">${date}</div>
   <div class="pied-auteur" aria-hidden="true">${auteur}</div>
-  ${corps}
+  <div class="corps-document">
+${corps}
+  </div>
 </body>
 </html>`;
 }
