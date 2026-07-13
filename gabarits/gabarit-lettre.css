@@ -64,7 +64,7 @@ body {
 
 /* ─── Mise en page lettre ────────────────────────────────────────────────── */
 
-.corps-document > p:first-child {
+.corps-document > p:first-of-type {
   text-align: right;
   margin-bottom: 3em;
   font-style: italic;
@@ -98,7 +98,7 @@ p {
 }
 
 /* Formule de politesse — dernier paragraphe */
-.corps-document > p:last-child {
+.corps-document > p:last-of-type {
   margin-top: 3em;
   text-align: left;
 }
