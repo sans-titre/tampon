@@ -6,14 +6,14 @@
 set -euo pipefail
 # cd silencieux : avec CDPATH posé dans l'environnement, cd écho le chemin
 # et polluerait la sortie Markdown.
-cd "$(dirname "$0")/.." > /dev/null
+cd "$(dirname "$0")/../.." > /dev/null
 
 IMAGE="${IMAGE:-ubuntu:24.04}"
 DEB=$(ls -t dist/tampon_*_amd64.deb | head -1)
 
 docker run --rm \
   -v "$PWD/$DEB":/tmp/tampon.deb:ro \
-  -v "$PWD/scripts/chronometrer-deb-interne.sh":/tmp/chrono.sh:ro \
+  -v "$PWD/scripts/deb/chronometrer-deb-interne.sh":/tmp/chrono.sh:ro \
   "$IMAGE" \
   bash /tmp/chrono.sh
 

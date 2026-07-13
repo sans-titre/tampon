@@ -2,7 +2,7 @@
 # Construit dist/tampon_<version>_amd64.deb de façon reproductible dans
 # l'image de construction (bun + outils en cache). À lancer depuis l'hôte.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 docker build -q -t tampon-construction docker/construction > /dev/null
 
@@ -11,6 +11,6 @@ docker run --rm \
   -v "$PWD":/src \
   -w /src \
   tampon-construction \
-  bash scripts/construire-deb-interne.sh
+  bash scripts/deb/construire-deb-interne.sh
 
 echo "✓ Paquet : $(ls dist/tampon_*_amd64.deb)"

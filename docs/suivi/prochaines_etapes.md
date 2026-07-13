@@ -23,7 +23,7 @@ autopsie sur la branche `explore/electron-desktop`).
 - **Tarball portable** (`.tar.gz` du même payload) pour Fedora/Arch —
   quasi gratuit : l'arborescence `usr/lib/tampon` se réutilise telle quelle.
 - **Mise à jour du moteur** : ré-épingler `CHS_VERSION` dans
-  `scripts/construire-deb-interne.sh` à chaque release et relancer
+  `scripts/deb/construire-deb-interne.sh` à chaque release et relancer
   `make test-deb`.
 - **Long terme — Tauri** : toujours l'état de l'art documenté
   (`explore/pagedjs-tauri`, bundle < 10 Mo, WebView système) ; à réévaluer

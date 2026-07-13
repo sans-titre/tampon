@@ -3,7 +3,7 @@
 # UI publiée sur http://localhost:$PORT, tirages récupérés dans ./tirages/.
 # Ctrl-C pour arrêter. Variables : IMAGE (def. ubuntu:24.04), PORT (def. 3000).
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 IMAGE="${IMAGE:-ubuntu:24.04}"
 PORT="${PORT:-3000}"

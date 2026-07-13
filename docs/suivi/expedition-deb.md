@@ -30,7 +30,7 @@ Docker, sur contenu local de confiance), il n'existe pas.
 
 On l'embarque donc dans le `.deb` (~110 Mo décompressé) : zéro prérequis,
 hors-ligne, rendu strictement identique sur toutes les distributions —
-version épinglée dans `scripts/construire-deb-interne.sh`.
+version épinglée dans `scripts/deb/construire-deb-interne.sh`.
 
 ### Client CDP natif (exit puppeteer et pagedjs-cli)
 
