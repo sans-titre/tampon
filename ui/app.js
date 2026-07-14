@@ -8,7 +8,7 @@ const inputNomFichier = document.getElementById("nom-fichier");
 const zoneStatut = document.getElementById("statut");
 
 function afficherStatut(message, type = "neutre") {
-  zoneStatut.className = "statut" + (type === "erreur" ? " erreur" : "");
+  zoneStatut.className = `statut${type === "erreur" ? " erreur" : ""}`;
   zoneStatut.innerHTML = message;
 }
 
@@ -64,7 +64,7 @@ btnComposer.addEventListener("click", async () => {
     const donnees = await reponse.json();
 
     if (!reponse.ok || donnees.erreur) {
-      afficherStatut("Erreur : " + (donnees.erreur ?? "inconnue"), "erreur");
+      afficherStatut(`Erreur : ${donnees.erreur ?? "inconnue"}`, "erreur");
       return;
     }
 
@@ -72,7 +72,7 @@ btnComposer.addEventListener("click", async () => {
     window.open(lien, "_blank");
     afficherStatut(`Tirage prêt.<br><a href="${lien}" target="_blank">Ouvrir à nouveau →</a>`);
   } catch (err) {
-    afficherStatut("Erreur réseau : " + err.message, "erreur");
+    afficherStatut(`Erreur réseau : ${err.message}`, "erreur");
   } finally {
     btnComposer.disabled = false;
   }

@@ -1,5 +1,5 @@
-import { appendFileSync, mkdirSync } from "fs";
-import { join } from "path";
+import { appendFileSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 import { LOGS_DIR } from "./config";
 
 const JOURNAL = join(LOGS_DIR, "atelier.log");

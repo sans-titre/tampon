@@ -1,4 +1,4 @@
-import { cpSync, existsSync, mkdirSync } from "fs";
+import { cpSync, existsSync, mkdirSync } from "node:fs";
 import {
   ESPACE_UTILISATEUR,
   EXEMPLES_FOURNIS,

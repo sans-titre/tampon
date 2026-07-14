@@ -3,8 +3,8 @@
 //   docker  : env posés par le Dockerfile (/app/...)
 //   .deb    : env posés par le wrapper /usr/bin/tampon (/usr/lib/tampon/share)
 
-import { homedir } from "os";
-import { join } from "path";
+import { homedir } from "node:os";
+import { join } from "node:path";
 
 export const BASE = "/sans-titre.art/tampon";
 

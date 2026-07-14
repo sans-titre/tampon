@@ -13,9 +13,9 @@
 // simplicité et l'isolation. Le jour du « mode lot », garder un processus
 // chaud et ouvrir un target par job (Target.createTarget est déjà là).
 
-import { mkdtempSync, rmSync, writeFileSync } from "fs";
-import { tmpdir } from "os";
-import { join } from "path";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { journal } from "./journal";
 
 const CHROMIUM = process.env.CHROMIUM_PATH ?? "/usr/bin/chromium";

@@ -1,6 +1,6 @@
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { file, serve } from "bun";
-import { existsSync, readdirSync } from "fs";
-import { join } from "path";
 import { amorcerEspaceUtilisateur } from "./src/amorcage";
 import { composer, obtenirPageImpression } from "./src/composer";
 import { BASE, GABARITS_DIR, TIRAGES_DIR, UI_DIR } from "./src/config";
@@ -45,7 +45,7 @@ function listerGabarits(): string[] {
 async function traiter(req: Request, port: number): Promise<Response> {
   const { pathname } = new URL(req.url);
 
-  if (req.method === "GET" && (pathname === BASE || pathname === BASE + "/")) {
+  if (req.method === "GET" && (pathname === BASE || pathname === `${BASE}/`)) {
     return servirFichier(UI_DIR, "index.html");
   }
 

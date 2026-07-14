@@ -1,6 +1,6 @@
-import { randomUUID } from "crypto";
-import { mkdirSync, rmSync, writeFileSync } from "fs";
-import { join } from "path";
+import { randomUUID } from "node:crypto";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { BASE, TIRAGES_DIR } from "./config";
 import { imprimer } from "./imprimante";
 import { journal } from "./journal";
