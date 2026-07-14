@@ -6,6 +6,8 @@ services:
     build:
       context: ..
       dockerfile: docker/atelier/Dockerfile
+      args:
+        BUN_VERSION: ${BUN_VERSION}
     ports:
       - "${PORT_HOTE:-3000}:3000"
     volumes:

@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-docker build -q -t tampon-construction docker/construction > /dev/null
+docker build -q --build-arg BUN_VERSION="$(cat docker/bun-version)" -t tampon-construction docker/construction > /dev/null
 
 mkdir -p dist/cache
 docker run --rm \

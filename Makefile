@@ -7,6 +7,10 @@ PORT_HOTE   ?= 3000
 ATELIER_URL := http://localhost:$(PORT_HOTE)/sans-titre.art/tampon
 export PORT_HOTE
 
+# Source unique de la version de Bun (voir docker/bun-version)
+BUN_VERSION := $(shell cat docker/bun-version)
+export BUN_VERSION
+
 build:
 	docker compose -f docker/docker-compose.yml build
 
@@ -27,7 +31,7 @@ doc:
 	$(MAKE) -C docs
 
 # Livrable Linux : dist/tampon_<version>_amd64.deb (binaire Bun compilé
-# + chrome-headless-shell embarqué, construit dans oven/bun:1-debian)
+# + chrome-headless-shell embarqué, oven/bun:$(BUN_VERSION)-debian)
 paquet:
 	bash scripts/deb/construire-deb.sh
 
@@ -52,11 +56,11 @@ test: up
 # Lint + format (biome) dans le conteneur bun — aucune installation locale.
 lint:
 	docker run --rm -u "$$(id -u):$$(id -g)" -e HOME=/tmp -v "$$PWD":/src -w /src \
-		oven/bun:1-debian sh -c "bun install --silent && bun run lint"
+		oven/bun:$(BUN_VERSION)-debian sh -c "bun install --silent && bun run lint"
 
 format:
 	docker run --rm -u "$$(id -u):$$(id -g)" -e HOME=/tmp -v "$$PWD":/src -w /src \
-		oven/bun:1-debian sh -c "bun install --silent && bun run format"
+		oven/bun:$(BUN_VERSION)-debian sh -c "bun install --silent && bun run format"
 
 MD      ?= examples/rapport.md
 GABARIT ?= rapport
