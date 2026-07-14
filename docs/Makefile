@@ -1,9 +1,11 @@
+# ── Configuration
 IMAGE   := sans-titre-mermaid
 SOURCES := $(wildcard diagrammes/*.mmd)
 RENDUS  := $(patsubst diagrammes/%.mmd,rendus/%.png,$(SOURCES))
 
 .PHONY: all build clean
 
+# ── Rendu des diagrammes
 all: build $(RENDUS)
 
 build:
@@ -21,5 +23,6 @@ rendus/%.png: diagrammes/%.mmd | rendus
 rendus:
 	mkdir -p rendus
 
+# ── Nettoyage
 clean:
 	rm -f rendus/*.png
